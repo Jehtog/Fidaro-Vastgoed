@@ -1,0 +1,52 @@
+{
+  "summary": "Full backend + frontend test of Fidaro Vastgoed bilingual landing site. 12/13 backend tests pass. One CRITICAL backend bug: GET /api/payments/v1/checkout/status/{session_id} returns 500 due to a Pydantic validation error inside the emergentintegrations library (metadata field expects dict but receives StripeObject). This will break the /success polling page in the user flow. All other endpoints (root, leads, admin login/leads/payments, checkout session create, invalid package handling) work as specified. Frontend landing page renders all 12 sections, cookie banner, NL/EN language switcher, FAQ accordion, contact form (creates lead, success toast shown), pricing modal (quickscan-buy-btn -> qs-pay-btn) and inline QuickScan section (qs-inline-*) all work and successfully call the backend checkout session endpoint which returns a valid Stripe url + session_id. Admin login works with correct password and lands on admin-dashboard. Note: admin tab testids in code are 'tab-leads'/'tab-payments' (not 'admin-leads-tab'/'admin-payments-tab' as listed in the review request).",
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "GET /api/payments/v1/checkout/status/{session_id}",
+        "issue": "Returns 500. emergentintegrations.payments.stripe.checkout raises CheckoutError: 'Unexpected error retrieving session status: 1 validation error for CheckoutStatusResponse metadata: Input should be a valid dictionary'. Stripe returns metadata as a StripeObject; the library's Pydantic model expects a plain dict. Because Success.js polls this endpoint, the post-payment success page will fail. Workaround in /app/backend/server.py would be to fetch the session via the raw stripe SDK or coerce metadata to dict before returning. Recommend reporting to emergentintegrations maintainers or wrapping the call.",
+        "priority": "CRITICAL"
+      }
+    ],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Post-payment /success polling",
+        "issue": "Success.js polls GET /api/payments/v1/checkout/status/{session_id} which currently 500s, so the user will never see a paid state after Stripe redirect.",
+        "affected_selectors": ["/success page polling"]
+      }
+    ],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Fix /api/payments/v1/checkout/status/{session_id} 500 error. Root cause: emergentintegrations CheckoutStatusResponse.metadata expects dict but Stripe library returns StripeObject. Suggested fix: in get_checkout_status route, catch the CheckoutError or fetch status via stripe.checkout.Session.retrieve directly and build the response manually, OR coerce metadata to dict(metadata) before the Pydantic model is constructed (may require a library upgrade or wrapping). This is blocking the /success polling page.",
+    "(Cosmetic) Align admin tab testids with documentation: code uses tab-leads/tab-payments; review request expected admin-leads-tab/admin-payments-tab. Either update review docs or rename testids."
+  ],
+  "critical_code_review_comments": [
+    "server.py: /api/payments/v1/checkout/status route has no try/except around stripe_checkout.get_checkout_status — a library exception bubbles up as raw 500 with no logging. Wrap and log; return a structured error so the /success polling UI can render a graceful failure state.",
+    "server.py: webhook endpoint silently ignores updating payment_transactions if session_id is missing; consider logging a warning.",
+    "Lead model uses EmailStr which correctly returns 422 on invalid email (verified). create_lead does not deduplicate by email; acceptable for a marketing site but worth noting.",
+    "ADMIN_PASSWORD comparison is a plain string compare (timing-attack-prone). For a low-stakes admin viewer this is acceptable; use hmac.compare_digest for hardening.",
+    "Admin token is literally the password — fine for MVP, but Bearer tokens should not equal the secret. Consider returning a short opaque token bound server-side."
+  ],
+  "updated_files": [
+    "/app/backend/tests/backend_test.py (new)"
+  ],
+  "success_rate": {
+    "backend": "92% (12/13 passing; checkout/status 500)",
+    "frontend": "100% on tested flows (landing render, sections, cookie, lang switch, FAQ, contact form lead creation, pricing modal request, inline quickscan request, admin login)"
+  },
+  "test_credentials": "Admin password: fidaro2026admin (verified working)",
+  "seed_data_creation": "Created test leads (test_user@example.com, test_buyer@example.com, test_inline2@example.com, test_contact@example.com) and at least 2 payment_transactions rows with status=initiated during checkout-session tests.",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Run pytest at /app/backend/tests/backend_test.py to validate. The only failing test is test_checkout_status (Pydantic validation error from emergentintegrations library on metadata field). Once fixed, re-run pytest and verify /success page renders correctly in browser by navigating to /success?session_id=<id-from-payments-collection>. Pricing modal qs-pay-btn and inline qs-inline-pay-btn both successfully POST to /api/payments/v1/checkout/session and receive a Stripe url + session_id (do NOT complete checkout in browser).",
+  "rca_of_the_issue": "Stripe Python SDK returns session.metadata as a StripeObject (subclass of dict but not isinstance(dict) per Pydantic strict mode). The emergentintegrations library defines CheckoutStatusResponse.metadata: dict and Pydantic v2 rejects StripeObject. Reproduction: POST /api/payments/v1/checkout/session with quickscan + origin_url, then GET /api/payments/v1/checkout/status/{session_id} -> 500. Mitigation in app code: in server.py, wrap the call: try {status = await stripe_checkout.get_checkout_status(sid)} except CheckoutError as e: fallback to stripe.checkout.Session.retrieve(sid) using the raw stripe SDK and manually build the response dict, coercing metadata via dict(session.metadata)."
+}
