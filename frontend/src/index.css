@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -10,32 +10,39 @@ html {
 
 body {
   margin: 0;
-  font-family: "Outfit", system-ui, -apple-system, sans-serif;
+  font-family: "Manrope", system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: #ffffff;
-  color: #1e1e1e;
+  color: #0f1410;
+  letter-spacing: -0.005em;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-.font-serif {
-  font-family: "Cormorant Garamond", serif;
-  letter-spacing: -0.01em;
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Manrope", system-ui, sans-serif;
+  letter-spacing: -0.025em;
+  font-weight: 700;
+}
+
+.font-mono {
+  font-family: "JetBrains Mono", ui-monospace, "Cascadia Code", "Source Code Pro", monospace;
+  font-feature-settings: "tnum" 1, "ss01" 1;
+}
+
+.font-display {
+  font-family: "Manrope", system-ui, sans-serif;
+  letter-spacing: -0.035em;
+  font-weight: 800;
 }
 
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 0 0% 11.8%;
+    --foreground: 132 12% 7%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 11.8%;
+    --card-foreground: 132 12% 7%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 11.8%;
+    --popover-foreground: 132 12% 7%;
     --primary: 134 16% 37%;
     --primary-foreground: 0 0% 100%;
     --secondary: 130 14% 92%;
@@ -46,10 +53,10 @@ h6,
     --accent-foreground: 134 16% 30%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
+    --border: 0 0% 92%;
+    --input: 0 0% 92%;
     --ring: 134 16% 37%;
-    --radius: 0.75rem;
+    --radius: 0.875rem;
   }
 }
 
@@ -76,9 +83,36 @@ h6,
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.05;
+  opacity: 0.04;
   background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
 }
+
+/* Glass-morphism utility */
+.glass {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.glass-light {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgba(15, 20, 16, 0.06);
+}
+
+/* Radial spotlights */
+.spotlight-green {
+  background: radial-gradient(60% 60% at 30% 20%, rgba(79, 111, 87, 0.35) 0%, rgba(79, 111, 87, 0) 70%),
+    radial-gradient(50% 50% at 80% 80%, rgba(79, 111, 87, 0.25) 0%, rgba(79, 111, 87, 0) 70%);
+}
+
+/* Animated subtle pulse for live indicator */
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.92); }
+}
+.pulse-soft { animation: pulse-soft 1.8s ease-in-out infinite; }
 
 .fidaro-link-underline {
   position: relative;
@@ -98,6 +132,9 @@ h6,
 .fidaro-link-underline:hover::after {
   transform: scaleX(1);
 }
+
+/* Tabular nums for any data figure */
+.tabular { font-variant-numeric: tabular-nums; }
 
 @layer base {
   [data-debug-wrapper="true"] {

@@ -10,6 +10,7 @@ import StatsSection from "../components/sections/StatsSection";
 import AdvantageSection from "../components/sections/AdvantageSection";
 import PricingSection from "../components/sections/PricingSection";
 import ProcessSection from "../components/sections/ProcessSection";
+import RoadmapSection from "../components/sections/RoadmapSection";
 import FaqSection from "../components/sections/FaqSection";
 import ContactSection from "../components/sections/ContactSection";
 
@@ -28,6 +29,7 @@ export default function Landing() {
         <AdvantageSection />
         <PricingSection />
         <ProcessSection />
+        <RoadmapSection />
         <FaqSection />
         <ContactSection />
       </main>

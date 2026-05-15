@@ -7,6 +7,29 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
+const LOGO_URL =
+  "https://customer-assets.emergentagent.com/job_35e0d8c8-8484-434c-b0cb-1a5cfc9d3012/artifacts/p4sighyv_Untitled%20design%20%2811%29.png";
+
+// Module-level logo cache (data URL, fetched lazily once)
+let _logoCache = null;
+const fetchLogoDataUrl = async () => {
+  if (_logoCache) return _logoCache;
+  try {
+    const res = await fetch(LOGO_URL, { mode: "cors" });
+    const blob = await res.blob();
+    _logoCache = await new Promise((resolve, reject) => {
+      const fr = new FileReader();
+      fr.onload = () => resolve(fr.result);
+      fr.onerror = reject;
+      fr.readAsDataURL(blob);
+    });
+    return _logoCache;
+  } catch (e) {
+    console.warn("Logo fetch failed; PDF will fall back to wordmark only.", e);
+    return null;
+  }
+};
+
 const FIDARO_GREEN = [79, 111, 87]; // #4F6F57
 const FIDARO_GREEN_DARK = [63, 92, 73]; // #3F5C49
 const FIDARO_GREEN_LIGHT = [234, 241, 235]; // #EAF1EB
@@ -169,7 +192,7 @@ const formatNumber = (n) => (typeof n === "number" ? n.toLocaleString("nl-NL") :
 const formatEuro = (n) =>
   n ? "€ " + Number(n).toLocaleString("nl-NL", { maximumFractionDigits: 0 }) : "—";
 
-export const generateWWSReport = (input, result, lang = "nl") => {
+export const generateWWSReport = async (input, result, lang = "nl") => {
   const L = COPY[lang] || COPY.nl;
   const doc = new jsPDF({ unit: "mm", format: "a4" });
 
@@ -182,16 +205,39 @@ export const generateWWSReport = (input, result, lang = "nl") => {
   doc.setFillColor(...FIDARO_GREEN_DARK);
   doc.rect(0, 0, pageW, 34, "F");
 
-  // Wordmark
-  doc.setTextColor(255, 255, 255);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(18);
-  doc.text(L.brand, margin, 16);
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(234, 241, 235);
-  doc.text(L.subtitle, margin, 22);
+  // Try to embed logo (async, best-effort)
+  const logoDataUrl = await fetchLogoDataUrl();
+  if (logoDataUrl) {
+    try {
+      doc.addImage(logoDataUrl, "PNG", margin, 7, 20, 20);
+      // Wordmark next to logo
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(15);
+      doc.text("fidaro", margin + 23, 16);
+      doc.setTextColor(122, 164, 135); // green-bright
+      doc.text("vastgoed", margin + 23 + 16, 16);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(234, 241, 235);
+      doc.text(L.subtitle, margin + 23, 22);
+    } catch (e) {
+      // Fallback wordmark only
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(18);
+      doc.text(L.brand, margin, 16);
+    }
+  } else {
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.text(L.brand, margin, 16);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(234, 241, 235);
+    doc.text(L.subtitle, margin, 22);
+  }
 
   // Date right
   const today = new Date().toLocaleDateString(lang === "nl" ? "nl-NL" : "en-GB", {
