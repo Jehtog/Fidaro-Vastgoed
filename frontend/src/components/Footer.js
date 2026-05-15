@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useLang } from "../contexts/LanguageContext";
 
 const LOGO_URL =
@@ -65,12 +66,12 @@ export default function Footer() {
               <li className="text-white/50">Nederland</li>
             </ul>
             <div className="mt-6 flex gap-4 text-xs">
-              <a href="#privacy" data-testid="footer-privacy" className="text-white/60 hover:text-white">
+              <Link to="/privacy" data-testid="footer-privacy" className="text-white/60 hover:text-white">
                 {t.footer.privacy}
-              </a>
-              <a href="#terms" data-testid="footer-terms" className="text-white/60 hover:text-white">
+              </Link>
+              <Link to="/terms" data-testid="footer-terms" className="text-white/60 hover:text-white">
                 {t.footer.terms}
-              </a>
+              </Link>
             </div>
           </div>
         </div>
