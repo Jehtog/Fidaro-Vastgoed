@@ -59,9 +59,6 @@ export default function PricingSection() {
               {card.popular && (
                 <>
                   <div className="absolute -top-24 -right-24 w-72 h-72 bg-fidaro-green/30 rounded-full blur-3xl" />
-                  <div className="absolute top-6 right-6 inline-flex items-center gap-1.5 bg-fidaro-green-bright/15 border border-fidaro-green-bright/40 text-fidaro-green-bright text-[10px] uppercase tracking-widest font-semibold px-2.5 py-1 rounded-full">
-                    <Sparkles className="w-3 h-3" /> MVP
-                  </div>
                 </>
               )}
               <div className="relative">

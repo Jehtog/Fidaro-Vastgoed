@@ -3,14 +3,13 @@ import Footer from "../components/Footer";
 import Hero from "../components/sections/Hero";
 import ProblemSection from "../components/sections/ProblemSection";
 import GapSection from "../components/sections/GapSection";
-import SolutionSection from "../components/sections/SolutionSection";
-import ProductSection from "../components/sections/ProductSection";
 import QuickScanSection from "../components/sections/QuickScanSection";
+import ProductSection from "../components/sections/ProductSection";
 import StatsSection from "../components/sections/StatsSection";
 import AdvantageSection from "../components/sections/AdvantageSection";
 import PricingSection from "../components/sections/PricingSection";
 import ProcessSection from "../components/sections/ProcessSection";
-import RoadmapSection from "../components/sections/RoadmapSection";
+import CalculatorTeaser from "../components/sections/CalculatorTeaser";
 import FaqSection from "../components/sections/FaqSection";
 import ContactSection from "../components/sections/ContactSection";
 
@@ -22,14 +21,13 @@ export default function Landing() {
         <Hero />
         <ProblemSection />
         <GapSection />
-        <SolutionSection />
-        <ProductSection />
         <QuickScanSection />
+        <ProductSection />
         <StatsSection />
         <AdvantageSection />
         <PricingSection />
         <ProcessSection />
-        <RoadmapSection />
+        <CalculatorTeaser />
         <FaqSection />
         <ContactSection />
       </main>

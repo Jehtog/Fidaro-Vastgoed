@@ -4,18 +4,35 @@
 // All copy is rendered bilingually based on the active `lang`.
 // =============================================================================
 
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
+import { jsPDF } from "jspdf";
+// Side-effect import: registers `autoTable` on jsPDF prototype.
+import "jspdf-autotable";
+// Also keep the function form available as a fallback.
+import autoTableFn from "jspdf-autotable";
+
+const callAutoTable = (doc, opts) => {
+  if (typeof doc.autoTable === "function") {
+    doc.autoTable(opts);
+  } else if (typeof autoTableFn === "function") {
+    autoTableFn(doc, opts);
+  } else {
+    throw new Error("autoTable not available");
+  }
+};
 
 const LOGO_URL =
   "https://customer-assets.emergentagent.com/job_35e0d8c8-8484-434c-b0cb-1a5cfc9d3012/artifacts/p4sighyv_Untitled%20design%20%2811%29.png";
 
-// Module-level logo cache (data URL, fetched lazily once)
+// Module-level logo cache (data URL, fetched lazily once with 2s timeout)
 let _logoCache = null;
 const fetchLogoDataUrl = async () => {
   if (_logoCache) return _logoCache;
   try {
-    const res = await fetch(LOGO_URL, { mode: "cors" });
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 2500);
+    const res = await fetch(LOGO_URL, { mode: "cors", signal: ctrl.signal });
+    clearTimeout(timer);
+    if (!res.ok) return null;
     const blob = await res.blob();
     _logoCache = await new Promise((resolve, reject) => {
       const fr = new FileReader();
@@ -25,7 +42,7 @@ const fetchLogoDataUrl = async () => {
     });
     return _logoCache;
   } catch (e) {
-    console.warn("Logo fetch failed; PDF will fall back to wordmark only.", e);
+    console.warn("Fidaro PDF: logo fetch skipped:", e?.message || e);
     return null;
   }
 };
@@ -313,15 +330,17 @@ export const generateWWSReport = async (input, result, lang = "nl") => {
   doc.text(L.propertyDetails, margin, y);
   y += 5;
 
+  const NA = lang === "nl" ? "Niet ingevuld" : "Not provided";
   const propRows = [
-    [L.propertyType, L.propertyTypes[input.property_type] || input.property_type || "—"],
-    [L.year, input.year || "—"],
-    [L.floorArea, input.usable_floor_area || "—"],
-    [L.energyLabel, input.energy_label && input.energy_label !== "no_label" ? input.energy_label : "—"],
-    [L.woz, input.woz_value ? formatEuro(input.woz_value) : "—"],
-    [L.rent, input.current_rent ? formatEuro(input.current_rent) + " /mnd" : "—"],
+    [L.address, input.address || NA],
+    [L.propertyType, L.propertyTypes[input.property_type] || input.property_type || NA],
+    [L.year, input.year ? String(input.year) : NA],
+    [L.floorArea, input.usable_floor_area ? String(input.usable_floor_area) : NA],
+    [L.energyLabel, input.energy_label && input.energy_label !== "no_label" ? input.energy_label : NA],
+    [L.woz, input.woz_value ? formatEuro(input.woz_value) : NA],
+    [L.rent, input.current_rent ? formatEuro(input.current_rent) + (lang === "nl" ? " /mnd" : " /mo") : NA],
   ];
-  autoTable(doc, {
+  callAutoTable(doc, {
     startY: y,
     margin: { left: margin, right: margin },
     head: [],
@@ -348,7 +367,7 @@ export const generateWWSReport = async (input, result, lang = "nl") => {
       const valStr = (v > 0 ? "+" : "") + String(v);
       return [L.breakdownLabels[k] || k, valStr];
     });
-  autoTable(doc, {
+  callAutoTable(doc, {
     startY: y,
     margin: { left: margin, right: margin },
     head: [[L.breakdownCol1, L.breakdownCol2]],
@@ -441,8 +460,10 @@ export const generateWWSReport = async (input, result, lang = "nl") => {
   drawFooters(doc, L);
 
   // Save
-  const safeAddr = (input.address || "fidaro-wws").replace(/[^a-z0-9]+/gi, "-").slice(0, 40);
-  const filename = `${L.title.replace(/\s+/g, "-")}-${safeAddr}.pdf`;
+  const datePart = new Date().toISOString().slice(0, 10);
+  const addrPart = (input.address || "").replace(/[^a-z0-9]+/gi, "-").replace(/^-+|-+$/g, "").slice(0, 40);
+  const tail = addrPart || datePart;
+  const filename = `Fidaro-WWS-Quickscan-${tail}.pdf`;
   doc.save(filename);
 };
 

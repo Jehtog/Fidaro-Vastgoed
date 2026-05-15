@@ -9,42 +9,46 @@ export default function ProductSection() {
     <section
       id="product"
       data-testid="product-section"
-      className="py-24 md:py-32 bg-fidaro-darker fidaro-grain relative text-white overflow-hidden"
+      className="py-24 md:py-32 bg-white relative"
     >
-      <div className="absolute -top-40 left-1/4 w-[600px] h-[600px] bg-fidaro-green/15 rounded-full blur-[120px]" />
-
       <div className="relative max-w-7xl mx-auto px-6 md:px-10 grid lg:grid-cols-12 gap-14 items-start">
         <div className="lg:col-span-5">
-          <div className="inline-block text-[11px] uppercase tracking-[0.22em] text-fidaro-green-bright font-semibold px-3 py-1 rounded-full bg-white/5 border border-white/10">
+          <div className="inline-block text-[11px] uppercase tracking-[0.22em] text-fidaro-green font-semibold px-3 py-1 rounded-full bg-fidaro-green-light">
             {t.product.label}
           </div>
-          <h2 className="mt-6 font-display text-4xl md:text-6xl text-white leading-[1.02]">
+          <h2 className="mt-6 font-display text-4xl md:text-5xl text-fidaro-ink leading-[1.05]">
             {t.product.title}
           </h2>
-          <p className="mt-6 text-lg text-white/65 leading-relaxed max-w-lg">{t.product.body}</p>
+          <p className="mt-6 text-lg text-fidaro-text-muted leading-relaxed max-w-lg">{t.product.body}</p>
 
-          <ul className="mt-10 space-y-3">
+          <ul className="mt-8 space-y-2.5">
             {t.product.features.map((f, i) => {
               const Icon = ICONS[i] || Check;
               return (
                 <li
                   key={i}
-                  className="flex items-center gap-4 rounded-2xl bg-white/5 border border-white/8 p-4"
+                  className="flex items-center gap-3 rounded-2xl bg-fidaro-green-light/40 border border-fidaro-green-light px-4 py-3"
                   data-testid={`product-feature-${i}`}
                 >
-                  <div className="w-9 h-9 rounded-lg bg-fidaro-green/20 flex items-center justify-center flex-shrink-0">
-                    <Icon className="w-4 h-4 text-fidaro-green-bright" />
+                  <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center flex-shrink-0 border border-fidaro-green-light">
+                    <Icon className="w-3.5 h-3.5 text-fidaro-green" />
                   </div>
-                  <span className="text-white/95">{f}</span>
+                  <span className="text-fidaro-ink text-sm">{f}</span>
                 </li>
               );
             })}
           </ul>
 
+          {t.product.sourcingNote && (
+            <p className="mt-5 text-sm text-fidaro-text-muted italic max-w-lg">
+              {t.product.sourcingNote}
+            </p>
+          )}
+
           <a
             href="#contact"
             data-testid="product-cta"
-            className="mt-10 inline-flex items-center gap-2 bg-fidaro-green hover:bg-fidaro-green-dark text-white rounded-full px-7 py-4 text-sm font-semibold tracking-tight transition-all"
+            className="mt-8 inline-flex items-center gap-2 bg-fidaro-green hover:bg-fidaro-green-dark text-white rounded-xl px-7 py-3.5 text-sm font-semibold tracking-tight transition-all shadow-[0_6px_22px_rgba(79,111,87,0.25)]"
           >
             {t.product.cta}
           </a>
@@ -62,19 +66,18 @@ export default function ProductSection() {
 function ReportMockup({ lang }) {
   return (
     <div className="relative">
-      <div className="absolute -inset-2 bg-gradient-to-tr from-fidaro-green/30 to-fidaro-green-bright/20 blur-2xl rounded-[2rem]" />
-      <div className="relative rounded-3xl bg-white text-fidaro-ink overflow-hidden shadow-2xl">
+      <div className="relative rounded-3xl bg-white text-fidaro-ink overflow-hidden shadow-[0_30px_60px_-20px_rgba(15,20,16,0.18)] border border-fidaro-green-light">
         {/* Header */}
         <div className="bg-fidaro-green-dark text-white px-7 py-5 flex items-center justify-between">
           <div>
-            <div className="text-[10px] uppercase tracking-[0.2em] text-fidaro-green-bright">
+            <div className="text-[10px] uppercase tracking-[0.2em] text-fidaro-green-light/90">
               Fidaro Investment Plan
             </div>
             <div className="font-bold text-lg mt-0.5">Damrak 1, Amsterdam</div>
           </div>
           <div className="text-right">
-            <div className="text-[10px] uppercase tracking-widest text-white/55">€ 750</div>
-            <div className="text-xs font-mono text-white/55">REPORT-0042</div>
+            <div className="text-[10px] uppercase tracking-widest text-white/65">€ 750</div>
+            <div className="text-xs text-white/55">Report 0042</div>
           </div>
         </div>
 

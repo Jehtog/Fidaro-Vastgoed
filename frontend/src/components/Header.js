@@ -31,15 +31,15 @@ export default function Header() {
       data-testid="site-header"
       className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
         scrolled
-          ? "bg-fidaro-darker/85 backdrop-blur-xl border-b border-white/8"
-          : "bg-transparent"
+          ? "bg-white/90 backdrop-blur-xl border-b border-fidaro-green-light"
+          : "bg-white/70 backdrop-blur"
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 md:px-10 h-20 flex items-center justify-between">
-        <Link to="/" data-testid="header-logo" className="flex items-center gap-3 text-white">
+        <Link to="/" data-testid="header-logo" className="flex items-center gap-3 text-fidaro-ink">
           <img src={LOGO_URL} alt="Fidaro Vastgoed" className="h-9 w-9 object-contain" />
           <span className="font-display text-lg tracking-tight">
-            fidaro <span className="text-fidaro-green-bright">vastgoed</span>
+            fidaro <span className="text-fidaro-green">vastgoed</span>
           </span>
         </Link>
 
@@ -49,7 +49,7 @@ export default function Header() {
               key={n.id}
               href={`#${n.id}`}
               data-testid={`nav-${n.id}`}
-              className="text-xs uppercase tracking-[0.18em] font-semibold text-white/65 hover:text-white fidaro-link-underline transition-colors"
+              className="text-sm font-medium text-fidaro-text-muted hover:text-fidaro-green-dark transition-colors"
             >
               {n.label}
             </a>
@@ -59,13 +59,13 @@ export default function Header() {
         <div className="flex items-center gap-2">
           <div
             data-testid="lang-switcher"
-            className="hidden md:flex items-center text-[10px] font-mono border border-white/15 rounded-full overflow-hidden"
+            className="hidden md:flex items-center text-[11px] font-medium border border-fidaro-green/20 rounded-full overflow-hidden"
           >
             <button
               data-testid="lang-nl-btn"
               onClick={() => setLang("nl")}
               className={`px-2.5 py-1.5 transition-colors ${
-                lang === "nl" ? "bg-white text-fidaro-ink" : "text-white/65 hover:text-white"
+                lang === "nl" ? "bg-fidaro-green text-white" : "text-fidaro-text-muted hover:text-fidaro-ink"
               }`}
             >
               NL
@@ -74,7 +74,7 @@ export default function Header() {
               data-testid="lang-en-btn"
               onClick={() => setLang("en")}
               className={`px-2.5 py-1.5 transition-colors ${
-                lang === "en" ? "bg-white text-fidaro-ink" : "text-white/65 hover:text-white"
+                lang === "en" ? "bg-fidaro-green text-white" : "text-fidaro-text-muted hover:text-fidaro-ink"
               }`}
             >
               EN
@@ -84,23 +84,23 @@ export default function Header() {
           <Link
             to="/wws-calculator"
             data-testid="header-calculator-link"
-            className="hidden md:inline-flex items-center gap-1.5 text-xs font-semibold text-white/85 hover:text-white border border-white/15 hover:border-white/30 rounded-full px-3 py-2 transition-colors"
+            className="hidden md:inline-flex items-center gap-1.5 text-sm font-medium text-fidaro-green-dark hover:text-fidaro-ink transition-colors"
           >
-            <Calculator className="w-3.5 h-3.5" />
+            <Calculator className="w-4 h-4" />
             {t.nav.calculator}
           </Link>
 
           <a
             href="#pricing"
             data-testid="header-cta"
-            className="hidden md:inline-flex bg-fidaro-green hover:bg-fidaro-green-dark text-white text-xs font-semibold rounded-full px-4 py-2 transition-colors shadow-[0_4px_20px_rgba(79,111,87,0.45)]"
+            className="hidden md:inline-flex bg-fidaro-green hover:bg-fidaro-green-dark text-white text-sm font-semibold rounded-xl px-5 py-2.5 transition-colors shadow-[0_4px_18px_rgba(79,111,87,0.25)]"
           >
             {t.nav.cta}
           </a>
 
           <button
             data-testid="mobile-menu-btn"
-            className="lg:hidden p-2 text-white"
+            className="lg:hidden p-2 text-fidaro-ink"
             onClick={() => setOpen(!open)}
             aria-label="Menu"
           >
@@ -110,24 +110,24 @@ export default function Header() {
       </div>
 
       {open && (
-        <div className="lg:hidden bg-fidaro-darker/95 backdrop-blur-xl border-t border-white/8 px-6 py-6 space-y-3">
+        <div className="lg:hidden bg-white border-t border-fidaro-green-light px-6 py-6 space-y-3">
           {nav.map((n) => (
             <a
               key={n.id}
               href={`#${n.id}`}
               onClick={() => setOpen(false)}
               data-testid={`nav-mobile-${n.id}`}
-              className="block text-white/80 hover:text-white text-sm"
+              className="block text-fidaro-ink hover:text-fidaro-green text-sm"
             >
               {n.label}
             </a>
           ))}
           <div className="flex items-center gap-2 pt-3">
-            <button data-testid="lang-mobile-nl" onClick={() => setLang("nl")} className={`px-3 py-1.5 text-xs rounded-full ${lang === "nl" ? "bg-fidaro-green text-white" : "bg-white/10 text-white/70"}`}>NL</button>
-            <button data-testid="lang-mobile-en" onClick={() => setLang("en")} className={`px-3 py-1.5 text-xs rounded-full ${lang === "en" ? "bg-fidaro-green text-white" : "bg-white/10 text-white/70"}`}>EN</button>
+            <button data-testid="lang-mobile-nl" onClick={() => setLang("nl")} className={`px-3 py-1.5 text-xs rounded-full ${lang === "nl" ? "bg-fidaro-green text-white" : "bg-fidaro-green-light text-fidaro-green-dark"}`}>NL</button>
+            <button data-testid="lang-mobile-en" onClick={() => setLang("en")} className={`px-3 py-1.5 text-xs rounded-full ${lang === "en" ? "bg-fidaro-green text-white" : "bg-fidaro-green-light text-fidaro-green-dark"}`}>EN</button>
           </div>
-          <a href="#pricing" onClick={() => setOpen(false)} data-testid="header-cta-mobile" className="block bg-fidaro-green text-white text-center rounded-full px-5 py-3 text-sm font-semibold">{t.nav.cta}</a>
-          <Link to="/wws-calculator" onClick={() => setOpen(false)} data-testid="header-calculator-mobile" className="block border border-white/15 text-white text-center rounded-full px-5 py-3 text-sm font-semibold">{t.nav.calculator}</Link>
+          <a href="#pricing" onClick={() => setOpen(false)} data-testid="header-cta-mobile" className="block bg-fidaro-green text-white text-center rounded-xl px-5 py-3 text-sm font-semibold">{t.nav.cta}</a>
+          <Link to="/wws-calculator" onClick={() => setOpen(false)} data-testid="header-calculator-mobile" className="block border border-fidaro-green/30 text-fidaro-green-dark text-center rounded-xl px-5 py-3 text-sm font-semibold">{t.nav.calculator}</Link>
         </div>
       )}
     </header>

@@ -3,11 +3,11 @@ export const wwsT = {
   nl: {
     page: {
       eyebrow: "WWS Calculator · 2025",
-      title: "Indicatieve WWS-puntenberekening",
+      title: "Bereken je indicatieve WWS-positie",
       intro:
-        "Bereken een indicatieve WWS-score voor zelfstandige woonruimte volgens de regels van 2025. De uitkomst is geen officieel Huurcommissie-resultaat.",
+        "Gebruik de calculator voor een eerste indicatie van de WWS-score en huurcategorie van een pand. Voor een nauwkeurige beoordeling kun je een Fidaro Quick-Scan aanvragen.",
       disclaimer:
-        "Deze calculator geeft een indicatieve WWS-schatting op basis van de regels van 2025 voor zelfstandige woonruimte. De uiteindelijke score kan afwijken afhankelijk van exacte metingen, documentatie, officiële Huurcommissie-interpretatie, juridische context en beleidsupdates. Aan dit resultaat kunnen geen rechten worden ontleend.",
+        "Deze calculator geeft een indicatieve schatting op basis van de ingevoerde gegevens. De definitieve uitkomst kan afwijken afhankelijk van officiële documentatie, exacte metingen, actuele regelgeving en specifieke pandkenmerken. Aan dit resultaat kunnen geen rechten worden ontleend.",
       reset: "Wis formulier",
     },
     sections: {
@@ -202,11 +202,11 @@ export const wwsT = {
   en: {
     page: {
       eyebrow: "WWS Calculator · 2025",
-      title: "Indicative WWS point estimate",
+      title: "Check your indicative WWS position",
       intro:
-        "Estimate an indicative WWS score for independent residential housing under the 2025 rules. This is not an official Huurcommissie result.",
+        "Use the calculator to get a first indication of a property's WWS score and rent category. For a more accurate review, request a Fidaro Quick-Scan.",
       disclaimer:
-        "This calculator provides an indicative WWS estimate based on 2025 rules for zelfstandige woonruimte. The final score may differ depending on exact measurements, documentation, official Huurcommissie interpretation, legal context, and policy updates. No rights can be derived from this result.",
+        "This calculator provides an indicative estimate based on available inputs. Final outcomes may differ depending on official documentation, exact measurements, current regulation, and individual property details. No rights can be derived from the result.",
       reset: "Reset form",
     },
     sections: {

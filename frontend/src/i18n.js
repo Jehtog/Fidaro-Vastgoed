@@ -3,41 +3,42 @@ export const translations = {
   nl: {
     nav: {
       problem: "Probleem",
-      solution: "Oplossing",
+      solution: "Aanpak",
       pricing: "Tarieven",
-      process: "Proces",
+      process: "Werkwijze",
       faq: "FAQ",
       contact: "Contact",
       cta: "Vraag Quick-Scan aan",
       calculator: "WWS-Calculator",
     },
     hero: {
-      eyebrow: "Onafhankelijke validatie van vastgoedinvesteringen",
+      eyebrow: "Onafhankelijke validatie voor Nederlandse vastgoedbeleggingen",
       title: "Valideer vastgoed voordat je investeert.",
       subtitle:
-        "Fidaro Vastgoed helpt vastgoedinvesteerders WWS-huurgrenzen, fiscale impact, renovatiepotentieel en verwacht rendement te begrijpen voordat kapitaal wordt vastgelegd.",
-      primary: "Vraag een €99 Quick-Scan aan",
-      secondary: "Bekijk het Fidaro Investment Plan",
-      trust: "Onafhankelijke validatie. Geen makelaarsbelang. Data-gedreven advies.",
+        "Fidaro helpt vastgoedbeleggers WWS-punten, huurgrenzen, fiscale impact, renovatiepotentieel en verwacht rendement te toetsen voordat zij kapitaal vastleggen.",
+      primary: "Start €99 Quick-Scan",
+      secondary: "Bekijk Investment Plan",
+      trust: "Onafhankelijke vastgoedvalidatie. Geen makelaarsbelang. Data-gedreven advies.",
     },
     problem: {
       label: "De realiteit",
       title: "Vastgoed investeren in Nederland is veranderd.",
-      intro: "Investeerders krijgen vandaag te maken met:",
+      intro:
+        "Nieuwe huurregelgeving, WWS-huurgrenzen, Box 3-belasting en energielabel-eisen hebben vastgoedinvesteren complexer gemaakt. Een pand kan online winstgevend lijken, maar regulering kan het rendement volledig veranderen.",
       items: [
-        { title: "Wet Betaalbare Huur", desc: "Nieuwe regulering met directe impact op huurinkomsten." },
         { title: "WWS-puntenstelsel", desc: "Bepaalt de wettelijk toegestane huurprijs per woning." },
-        { title: "Box 3 belasting", desc: "Hogere fiscale druk op vermogen en vastgoedrendement." },
         { title: "Huurprijsplafonds", desc: "Maximale huurprijzen die gereguleerd worden vastgesteld." },
-        { title: "Energielabel impact", desc: "Beïnvloedt punten, huur en investering in verduurzaming." },
+        { title: "Box 3 belasting", desc: "Hogere fiscale druk op vermogen en vastgoedrendement." },
+        { title: "Energielabel-impact", desc: "Beïnvloedt punten, toegestane huur en verduurzaming." },
+        { title: "Renovatiepotentieel", desc: "Strategische upgrades kunnen rendement openen — of juist niet." },
       ],
       callout: "Een pand kan online winstgevend lijken, maar regulering kan het rendement volledig veranderen.",
     },
     gap: {
       label: "De adviesleemte",
-      title: "Makelaars verkopen. Banken financieren. Niemand valideert.",
+      title: "Makelaars verkopen. Banken financieren. Fidaro valideert.",
       body:
-        "Makelaars richten zich op het verkopen van de woning. Banken focussen op financiering. Listing-platforms tonen kansen. Fidaro valideert of de investering écht werkt.",
+        "Makelaars richten zich op de transactie. Banken focussen op financiering. Listing-platforms tonen panden. Fidaro toetst onafhankelijk of de investering écht klopt.",
     },
     solution: {
       label: "Onze rol",
@@ -55,43 +56,43 @@ export const translations = {
       label: "Het volledige rapport",
       title: "Het Fidaro Investment Plan",
       body:
-        "Een diepgaande analyse op maat van jouw beoogde aankoop — van regulering tot rendement.",
+        "Voor beleggers die een diepere analyse willen, biedt het Fidaro Investment Plan een volledig pand-specifiek rapport dat regelgeving, financiële modellering en optimalisatie­advies combineert.",
       features: [
         "WWS-audit en puntenbepaling",
         "ROI-modellering met scenario's",
         "Box 3 en fiscale impact-analyse",
         "Renovatie- en energielabel-strategie",
+        "Indicatie van huurpotentieel",
         "Optionele property sourcing",
       ],
-      cta: "Vraag je Investment Plan aan",
+      sourcingNote:
+        "Optionele sourcing kan apart worden besproken — validatie blijft de kerndienst.",
+      cta: "Vraag Investment Plan aan",
     },
     quickscan: {
-      label: "Start hier",
-      title: "Begin met een €99 Quick-Scan",
+      label: "Eerste check",
+      title: "Start met een €99 Quick-Scan",
       body:
-        "De Quick-Scan is een lichtere panddoorlichting die investeerders een eerste, scherpe inschatting geeft voordat het volledige Investment Plan wordt aangevraagd.",
+        "De Fidaro Quick-Scan geeft beleggers een eerste onafhankelijke beoordeling van een pand voordat zij toezeggen aan een volledige investeringsanalyse.",
       features: [
-        "WOZ-waarde",
+        "WOZ-waarde-check",
         "Energielabel",
         "Indicatieve WWS-positie",
         "Geschat huurpotentieel",
-        "Basis investeringshaalbaarheid",
-        "Kernrisico's en vervolgstappen",
+        "Belangrijkste risico-indicatoren",
+        "Aanbeveling voor de volgende stap",
       ],
-      cta: "Vraag een €99 Quick-Scan aan",
-      note:
-        "Tijdens de MVP-fase is de Quick-Scan een betaalde dienst van €99 om écht betalingsbereidheid te toetsen. In de toekomst kan dit een gratis of laagdrempelige lead magnet worden voor het volledige Investment Plan.",
+      cta: "Vraag Quick-Scan aan",
     },
     stats: {
-      label: "Markt validatie",
-      title: "Onderbouwd door investeerdersonderzoek",
+      label: "Marktrealiteit",
+      title: "Onzekerheid bij beleggers is reëel.",
       items: [
-        { value: "67%", label: "vindt de markt zeer complex" },
-        { value: "88%", label: "is bereid te betalen voor advies" },
-        { value: "51", label: "onderzoeksreacties verzameld" },
+        { value: "67%", label: "noemt de Nederlandse huurmarkt zeer complex" },
+        { value: "88%", label: "overweegt te betalen voor onafhankelijk advies" },
       ],
       interpretation:
-        "Ons onderzoek toont aan dat investeerders niet vooral moeite hebben met het vínden van panden. Ze hebben moeite om te valideren of die panden nog steeds rendabel zijn.",
+        "Ons onderzoek bevestigt wat veel beleggers al voelen: de uitdaging is niet alleen het vinden van een pand, maar weten of die investering nog steeds rendabel is onder de huidige regels.",
     },
     advantage: {
       label: "Concurrentievoordeel",
@@ -101,11 +102,11 @@ export const translations = {
       cols: [
         {
           title: "Makelaars",
-          items: ["Transactie-gedreven", "Focus op verkopen", "Eigen belang"],
+          items: ["Transactie-gedreven", "Focus op het sluiten van de deal"],
         },
         {
           title: "Platforms",
-          items: ["Tonen listings", "Beperkte validatie", "Geen advies"],
+          items: ["Tonen listings", "Beperkte investeringsvalidatie"],
         },
         {
           title: "Fidaro",
@@ -116,14 +117,14 @@ export const translations = {
     },
     pricing: {
       label: "Tarieven",
-      title: "Eenvoudige, transparante prijzen",
-      note: "Validatie blijft de kerndienst. Optionele sourcing kan worden toegevoegd indien gewenst.",
+      title: "Eenvoudige, transparante prijzen.",
+      note: "Optionele property sourcing kan apart worden besproken.",
       cards: [
         {
           id: "quickscan",
           name: "Quick-Scan",
           price: "€99",
-          desc: "Een eerste, scherpe panddoorlichting.",
+          desc: "Eerste haalbaarheidscheck vóór een diepere analyse.",
           features: [
             "WOZ-waarde",
             "Energielabel",
@@ -139,13 +140,13 @@ export const translations = {
           id: "investment_plan",
           name: "Fidaro Investment Plan",
           price: "€750",
-          desc: "Diepgaande validatie voor serieuze investeerders.",
+          desc: "Volledig regelgevend en financieel validatierapport.",
           features: [
             "Volledige WWS-audit",
             "ROI-modellering met scenario's",
             "Box 3 / fiscale impact",
             "Renovatie- & energiestrategie",
-            "Optionele property sourcing",
+            "Huurpotentieel-indicatie",
             "Persoonlijk adviesgesprek",
           ],
           cta: "Vraag Investment Plan aan",
@@ -162,6 +163,13 @@ export const translations = {
         { n: "03", t: "Rapport", d: "Ontvang een Quick-Scan of volledig Investment Plan." },
         { n: "04", t: "Beslissen", d: "Kopen, onderhandelen, verbeteren of niet kopen." },
       ],
+    },
+    calculatorTeaser: {
+      label: "WWS-tool",
+      title: "Bereken je indicatieve WWS-positie.",
+      body:
+        "Gebruik onze calculator voor een eerste indicatie van de WWS-score en huurcategorie van een pand. Voor een nauwkeurige beoordeling kun je een Fidaro Quick-Scan aanvragen.",
+      cta: "Open WWS-Calculator",
     },
     faq: {
       label: "Veelgestelde vragen",
@@ -192,19 +200,21 @@ export const translations = {
     contact: {
       label: "Contact",
       title: "Valideer voordat je investeert.",
-      body: "Vul het formulier in en we nemen binnen één werkdag contact met je op.",
+      body:
+        "Stuur ons de panddetails en ontvang een onafhankelijke eerste beoordeling.",
       fields: {
         name: "Naam",
         email: "E-mail",
         phone: "Telefoonnummer",
         address: "Adres van het pand",
-        role: "Ben je eigenaar of koper?",
+        role: "Ben je koper of eigenaar?",
         role_owner: "Eigenaar",
         role_buyer: "Koper",
         service: "Gewenste dienst",
         service_q: "Quick-Scan (€99)",
         service_p: "Investment Plan (€750)",
-        service_c: "Eerst kennismaken",
+        service_s: "Optionele sourcing",
+        service_c: "Algemene vraag",
         message: "Bericht",
       },
       cta: "Pand indienen voor review",
@@ -236,7 +246,7 @@ export const translations = {
   en: {
     nav: {
       problem: "Problem",
-      solution: "Solution",
+      solution: "Approach",
       pricing: "Pricing",
       process: "Process",
       faq: "FAQ",
@@ -245,32 +255,33 @@ export const translations = {
       calculator: "WWS Calculator",
     },
     hero: {
-      eyebrow: "Independent validation of real estate investments",
+      eyebrow: "Independent validation for Dutch rental investments.",
       title: "Validate property investments before you buy.",
       subtitle:
-        "Fidaro Vastgoed helps real estate investors understand WWS rent limits, tax impact, renovation potential, and expected returns before committing capital.",
-      primary: "Request a €99 Quick-Scan",
-      secondary: "View the Fidaro Investment Plan",
-      trust: "Independent validation. No broker incentive. Data-driven advice.",
+        "Fidaro helps real estate investors check WWS points, rent limits, tax impact, renovation potential, and expected returns before committing capital.",
+      primary: "Start €99 Quick-Scan",
+      secondary: "View Investment Plan",
+      trust: "Independent real estate validation. No broker incentive. Data-driven advice.",
     },
     problem: {
       label: "The reality",
       title: "Dutch real estate investing has changed.",
-      intro: "Investors now face:",
+      intro:
+        "New rental regulations, WWS rent limits, Box 3 taxation, and energy label requirements have made property investing more complex. A property can look profitable online, but regulation can completely change the return.",
       items: [
-        { title: "Affordable Rent Act", desc: "New regulation with direct impact on rental income." },
-        { title: "WWS point system", desc: "Determines the legally permitted rent per property." },
-        { title: "Box 3 taxation", desc: "Higher tax pressure on wealth and real estate returns." },
-        { title: "Rent caps", desc: "Maximum regulated rent levels imposed by law." },
-        { title: "Energy label impact", desc: "Affects points, rent and sustainability investment." },
+        { title: "WWS points", desc: "Determines the legally permitted rent per property." },
+        { title: "Rent limits", desc: "Maximum regulated rent levels imposed by law." },
+        { title: "Box 3 tax impact", desc: "Higher tax pressure on wealth and real estate returns." },
+        { title: "Energy label effect", desc: "Affects points, allowed rent and sustainability." },
+        { title: "Renovation potential", desc: "Strategic upgrades may unlock returns — or not." },
       ],
       callout: "A property can look profitable online, but regulation can completely change the return.",
     },
     gap: {
       label: "The advisory gap",
-      title: "Brokers sell. Banks finance. Nobody validates.",
+      title: "Brokers sell. Banks finance. Fidaro validates.",
       body:
-        "Real estate agents focus on selling the property. Banks focus on financing. Listing platforms show opportunities. Fidaro validates whether the investment actually works.",
+        "Real estate agents focus on the transaction. Banks focus on financing. Listing platforms show properties. Fidaro independently checks whether the investment actually works.",
     },
     solution: {
       label: "Our role",
@@ -288,43 +299,43 @@ export const translations = {
       label: "The full report",
       title: "The Fidaro Investment Plan",
       body:
-        "An in-depth analysis tailored to your prospective purchase — from regulation to return.",
+        "For investors who want a deeper analysis, the Fidaro Investment Plan provides a full property-specific report combining regulation, financial modelling, and optimisation advice.",
       features: [
         "WWS audit and point calculation",
         "ROI modelling with scenarios",
         "Box 3 and tax impact analysis",
         "Renovation and energy label strategy",
+        "Rent potential indication",
         "Optional property sourcing",
       ],
-      cta: "Request your Investment Plan",
+      sourcingNote:
+        "Optional sourcing can be discussed separately, but validation remains the core service.",
+      cta: "Request Investment Plan",
     },
     quickscan: {
-      label: "Start here",
+      label: "First check",
       title: "Start with a €99 Quick-Scan",
       body:
-        "The Quick-Scan is a lighter property analysis designed to give investors an initial view before requesting the full Fidaro Investment Plan.",
+        "The Fidaro Quick-Scan gives investors a first independent assessment of a property before they commit to a full investment analysis.",
       features: [
-        "WOZ value",
-        "Energy label",
+        "WOZ value review",
+        "Energy label check",
         "Indicative WWS position",
         "Estimated rent potential",
-        "Basic investment feasibility",
-        "Key risks and next steps",
+        "Key risk indicators",
+        "Next-step recommendation",
       ],
-      cta: "Request a €99 Quick-Scan",
-      note:
-        "During the MVP phase, the Quick-Scan is a paid €99 service to test real willingness to pay. In the future, it may become a free or low-cost lead magnet for the full Fidaro Investment Plan.",
+      cta: "Request Quick-Scan",
     },
     stats: {
-      label: "Market validation",
-      title: "Validated by investor research",
+      label: "Market reality",
+      title: "Investor uncertainty is real.",
       items: [
-        { value: "67%", label: "view the market as highly complex" },
-        { value: "88%", label: "are willing to pay for advisory support" },
-        { value: "51", label: "survey responses collected" },
+        { value: "67%", label: "say the Dutch rental market is highly complex" },
+        { value: "88%", label: "would consider paying for advisory support" },
       ],
       interpretation:
-        "Our research showed that investors are not mainly struggling to find properties. They are struggling to validate whether those properties still make sense.",
+        "Our research confirms what many investors already feel: the challenge is not only finding a property, but knowing whether the investment still makes sense under today's rules.",
     },
     advantage: {
       label: "Competitive advantage",
@@ -332,8 +343,8 @@ export const translations = {
       body:
         "Unlike brokers or sourcing agencies, Fidaro does not depend on closing a transaction. Our role is to protect the investor's decision. If the numbers do not work, our advice can be: do not buy.",
       cols: [
-        { title: "Brokers", items: ["Transaction-driven", "Focus on selling", "Conflict of interest"] },
-        { title: "Platforms", items: ["Show listings", "Limited validation", "No advice"] },
+        { title: "Brokers", items: ["Transaction-driven", "Focus on closing the deal"] },
+        { title: "Platforms", items: ["Show listings", "Limited investment validation"] },
         {
           title: "Fidaro",
           items: ["Independent validation", "WWS + ROI + tax + renovation", "Can advise not to buy"],
@@ -343,14 +354,14 @@ export const translations = {
     },
     pricing: {
       label: "Pricing",
-      title: "Simple, transparent pricing",
-      note: "Validation remains the core service. Optional sourcing may be added if needed.",
+      title: "Simple, transparent pricing.",
+      note: "Optional property sourcing can be discussed separately.",
       cards: [
         {
           id: "quickscan",
           name: "Quick-Scan",
           price: "€99",
-          desc: "An initial, sharp property review.",
+          desc: "First feasibility check before deeper analysis.",
           features: [
             "WOZ value",
             "Energy label",
@@ -366,13 +377,13 @@ export const translations = {
           id: "investment_plan",
           name: "Fidaro Investment Plan",
           price: "€750",
-          desc: "In-depth validation for serious investors.",
+          desc: "Full regulatory and financial validation report.",
           features: [
             "Full WWS audit",
             "ROI modelling with scenarios",
             "Box 3 / tax impact",
             "Renovation & energy strategy",
-            "Optional property sourcing",
+            "Rent potential indication",
             "Personal advisory call",
           ],
           cta: "Request Investment Plan",
@@ -389,6 +400,13 @@ export const translations = {
         { n: "03", t: "Report", d: "Receive a Quick-Scan or full Investment Plan." },
         { n: "04", t: "Decide", d: "Buy, negotiate, improve, or walk away." },
       ],
+    },
+    calculatorTeaser: {
+      label: "WWS tool",
+      title: "Check your indicative WWS position.",
+      body:
+        "Use the calculator to get a first indication of a property's WWS score and rent category. For a more accurate review, request a Fidaro Quick-Scan.",
+      cta: "Open WWS Calculator",
     },
     faq: {
       label: "FAQ",
@@ -419,19 +437,20 @@ export const translations = {
     contact: {
       label: "Contact",
       title: "Validate before you invest.",
-      body: "Fill in the form and we'll reach out within one business day.",
+      body: "Send us the property details and receive an independent first assessment.",
       fields: {
         name: "Name",
         email: "Email",
-        phone: "Phone number",
+        phone: "Phone",
         address: "Property address",
-        role: "Are you an owner or buyer?",
+        role: "Are you buying or already owning the property?",
         role_owner: "Owner",
         role_buyer: "Buyer",
         service: "Desired service",
         service_q: "Quick-Scan (€99)",
         service_p: "Investment Plan (€750)",
-        service_c: "Initial conversation",
+        service_s: "Optional sourcing",
+        service_c: "General question",
         message: "Message",
       },
       cta: "Submit property for review",
