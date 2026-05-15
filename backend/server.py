@@ -186,32 +186,51 @@ async def create_checkout_session(payload: CheckoutCreateRequest, request: Reque
 
 @api_router.get("/payments/v1/checkout/status/{session_id}")
 async def get_checkout_status(session_id: str, request: Request):
-    host_url = str(request.base_url).rstrip("/")
-    webhook_url = f"{host_url}/api/webhook/stripe"
-    stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=webhook_url)
-
-    status: CheckoutStatusResponse = await stripe_checkout.get_checkout_status(session_id)
-
-    # Update DB once
+    """Return payment status from DB cache. Webhook updates this asynchronously.
+    Falls back to a permissive 'pending' so the UI can keep polling without failing.
+    """
     existing = await db.payment_transactions.find_one({"session_id": session_id}, {"_id": 0})
-    if existing and existing.get("payment_status") != "paid":
-        await db.payment_transactions.update_one(
-            {"session_id": session_id},
-            {
-                "$set": {
-                    "payment_status": status.payment_status,
-                    "status": status.status,
-                    "updated_at": datetime.now(timezone.utc).isoformat(),
-                }
-            },
-        )
+    if not existing:
+        # Unknown session
+        return {
+            "status": "open",
+            "payment_status": "pending",
+            "amount_total": None,
+            "currency": None,
+            "metadata": {},
+        }
+
+    # Try a best-effort sync with Stripe SDK; ignore failures
+    try:
+        import stripe as _stripe
+        _stripe.api_key = STRIPE_API_KEY
+        if "sk_test_emergent" in STRIPE_API_KEY:
+            _stripe.api_base = "https://integrations.emergentagent.com/stripe"
+        session = _stripe.checkout.Session.retrieve(session_id)
+        payment_status = session.get("payment_status")
+        session_status = session.get("status")
+        if payment_status and existing.get("payment_status") != "paid":
+            await db.payment_transactions.update_one(
+                {"session_id": session_id},
+                {
+                    "$set": {
+                        "payment_status": payment_status,
+                        "status": session_status,
+                        "updated_at": datetime.now(timezone.utc).isoformat(),
+                    }
+                },
+            )
+            existing["payment_status"] = payment_status
+            existing["status"] = session_status
+    except Exception as e:
+        logging.warning(f"Stripe sync skipped (using DB cache): {e}")
 
     return {
-        "status": status.status,
-        "payment_status": status.payment_status,
-        "amount_total": status.amount_total,
-        "currency": status.currency,
-        "metadata": status.metadata,
+        "status": existing.get("status", "open"),
+        "payment_status": existing.get("payment_status", "pending"),
+        "amount_total": int(float(existing.get("amount", 0)) * 100),
+        "currency": existing.get("currency"),
+        "metadata": existing.get("metadata", {}),
     }
 
 

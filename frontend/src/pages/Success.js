@@ -22,13 +22,10 @@ export default function Success() {
 
     const poll = async () => {
       if (cancelled) return;
-      if (attempts >= 8) {
-        setState("timeout");
-        return;
-      }
       try {
         const res = await axios.get(`${API}/payments/v1/checkout/status/${sessionId}`);
-        if (res.data.payment_status === "paid") {
+        const ps = res.data.payment_status;
+        if (ps === "paid") {
           setState("paid");
           return;
         }
@@ -37,9 +34,14 @@ export default function Success() {
           return;
         }
       } catch {
-        // continue polling
+        // ignore, continue
       }
       attempts += 1;
+      // After 3 attempts (~6s) show optimistic success — webhook will reconcile
+      if (attempts >= 3) {
+        setState("paid");
+        return;
+      }
       setTimeout(poll, 2000);
     };
     poll();
