@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   Info,
   RefreshCw,
+  Download,
 } from "lucide-react";
 import { useLang } from "../contexts/LanguageContext";
 import { wwsT } from "../wws/translations";
@@ -20,6 +21,7 @@ import {
   BATHROOM_EXTRAS,
   ENERGY_LABEL_POINTS,
 } from "../wws/config";
+import { generateWWSReport } from "../wws/pdfExport";
 import Footer from "../components/Footer";
 
 const initial = {
@@ -745,6 +747,19 @@ export default function WWSCalculator() {
 
               {/* CTAs */}
               <div className="mt-7 flex flex-col gap-2">
+                <button
+                  type="button"
+                  data-testid="wws-download-pdf-btn"
+                  onClick={() => generateWWSReport(numerizeInput(s), result, lang)}
+                  className={`inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 font-medium transition-colors ${
+                    category === "free"
+                      ? "bg-white/15 text-white hover:bg-white/25 border border-white/30"
+                      : "bg-fidaro-text-dark text-white hover:bg-black"
+                  }`}
+                >
+                  <Download className="w-4 h-4" />
+                  {lang === "nl" ? "Download PDF-rapport" : "Download PDF report"}
+                </button>
                 <Link
                   to="/#pricing"
                   data-testid="wws-cta-quickscan"
