@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useLang } from "../contexts/LanguageContext";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Calculator } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const LOGO_URL =
@@ -92,6 +92,15 @@ export default function Header() {
             {t.nav.cta}
           </a>
 
+          <Link
+            to="/wws-calculator"
+            data-testid="header-calculator-link"
+            className="hidden md:inline-flex items-center gap-2 border border-fidaro-green/30 hover:border-fidaro-green text-fidaro-green hover:bg-fidaro-green-light text-sm rounded-xl px-4 py-2.5 font-medium transition-colors"
+          >
+            <Calculator className="w-4 h-4" />
+            {t.nav.calculator}
+          </Link>
+
           <button
             data-testid="mobile-menu-btn"
             className="lg:hidden p-2"
@@ -144,6 +153,14 @@ export default function Header() {
           >
             {t.nav.cta}
           </a>
+          <Link
+            to="/wws-calculator"
+            onClick={() => setOpen(false)}
+            data-testid="header-calculator-mobile"
+            className="block border border-fidaro-green/40 text-fidaro-green text-center rounded-xl px-5 py-3 font-medium"
+          >
+            {t.nav.calculator}
+          </Link>
         </div>
       )}
     </header>

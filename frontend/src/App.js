@@ -6,6 +6,7 @@ import Landing from "./pages/Landing";
 import Success from "./pages/Success";
 import Admin from "./pages/Admin";
 import LegalPage from "./pages/LegalPage";
+import WWSCalculator from "./pages/WWSCalculator";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import CookieBanner from "./components/CookieBanner";
 
@@ -24,6 +25,7 @@ function App() {
             <Route path="/admin" element={<Admin />} />
             <Route path="/privacy" element={<LegalPage kind="privacy" />} />
             <Route path="/terms" element={<LegalPage kind="terms" />} />
+            <Route path="/wws-calculator" element={<WWSCalculator />} />
           </Routes>
           <CookieBanner />
         </BrowserRouter>

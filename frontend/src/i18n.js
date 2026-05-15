@@ -9,6 +9,7 @@ export const translations = {
       faq: "FAQ",
       contact: "Contact",
       cta: "Vraag Quick-Scan aan",
+      calculator: "WWS-Calculator",
     },
     hero: {
       eyebrow: "Onafhankelijke validatie van vastgoedinvesteringen",
@@ -241,6 +242,7 @@ export const translations = {
       faq: "FAQ",
       contact: "Contact",
       cta: "Request Quick-Scan",
+      calculator: "WWS Calculator",
     },
     hero: {
       eyebrow: "Independent validation of real estate investments",
