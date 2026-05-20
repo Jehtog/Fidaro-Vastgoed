@@ -248,7 +248,7 @@ export default function WWSCalculator() {
                 data-testid={`wws-step-${sdef.id}`}
                 className={`text-left rounded-2xl p-4 transition-all border ${
                   active
-                    ? "bg-fidaro-ink text-white border-fidaro-ink"
+                    ? "bg-fidaro-green-dark text-white border-fidaro-green-dark shadow-[0_12px_30px_-12px_rgba(63,92,73,0.45)]"
                     : done
                     ? "bg-fidaro-green-light/50 border-fidaro-green/30 text-fidaro-ink"
                     : "bg-white border-fidaro-green-light text-fidaro-ink hover:border-fidaro-green/40"
@@ -523,7 +523,7 @@ export default function WWSCalculator() {
               className={`rounded-3xl p-7 border relative overflow-hidden ${
                 category === "free"
                   ? "bg-fidaro-green text-white border-fidaro-green-dark"
-                  : "bg-fidaro-ink text-white border-fidaro-ink"
+                  : "bg-fidaro-green-dark text-white border-fidaro-green-dark"
               }`}
             >
               <div className="absolute -top-20 -right-20 w-56 h-56 bg-fidaro-green-bright/20 rounded-full blur-3xl" />

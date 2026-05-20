@@ -25,7 +25,7 @@ export default function AdvantageSection() {
               data-testid={`advantage-col-${i}`}
               className={`rounded-3xl p-7 transition-all relative overflow-hidden ${
                 c.highlight
-                  ? "bg-fidaro-ink text-white shadow-[0_30px_60px_-20px_rgba(15,20,16,0.4)] scale-[1.02]"
+                  ? "bg-fidaro-green-dark text-white shadow-[0_30px_60px_-20px_rgba(63,92,73,0.4)] scale-[1.02]"
                   : "bg-white border border-fidaro-green-light text-fidaro-ink"
               }`}
             >

@@ -53,16 +53,16 @@ export default function GapSection() {
           </div>
 
           {/* Fidaro */}
-          <div className="md:col-span-3 rounded-3xl bg-fidaro-ink text-white p-7 fidaro-grain relative overflow-hidden">
-            <div className="absolute -top-10 -right-10 w-48 h-48 bg-fidaro-green/30 blur-3xl rounded-full" />
+          <div className="md:col-span-3 rounded-3xl bg-fidaro-green-dark text-white p-7 relative overflow-hidden">
+            <div className="absolute -top-10 -right-10 w-48 h-48 bg-fidaro-green-bright/25 blur-3xl rounded-full" />
             <div className="relative">
-              <div className="w-11 h-11 rounded-xl bg-fidaro-green flex items-center justify-center">
+              <div className="w-11 h-11 rounded-xl bg-white/15 flex items-center justify-center">
                 <ShieldCheck className="w-5 h-5 text-white" />
               </div>
               <div className="mt-5 text-2xl font-bold tracking-tight">
                 {lang === "nl" ? "Fidaro valideert" : "Fidaro validates"}
               </div>
-              <div className="mt-2 text-sm text-white/60">
+              <div className="mt-2 text-sm text-white/75">
                 {lang === "nl"
                   ? "Onafhankelijk · WWS · ROI · Box 3 · Renovatie"
                   : "Independent · WWS · ROI · Box 3 · Renovation"}

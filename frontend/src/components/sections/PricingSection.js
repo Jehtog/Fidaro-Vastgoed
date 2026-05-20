@@ -52,13 +52,13 @@ export default function PricingSection() {
               data-testid={`pricing-card-${card.id}`}
               className={`relative rounded-3xl p-8 md:p-10 transition-all overflow-hidden ${
                 card.popular
-                  ? "bg-fidaro-ink text-white shadow-[0_30px_70px_-20px_rgba(15,20,16,0.5)]"
+                  ? "bg-fidaro-green-dark text-white shadow-[0_30px_70px_-20px_rgba(63,92,73,0.5)]"
                   : "bg-white border border-fidaro-green-light text-fidaro-ink"
               }`}
             >
               {card.popular && (
                 <>
-                  <div className="absolute -top-24 -right-24 w-72 h-72 bg-fidaro-green/30 rounded-full blur-3xl" />
+                  <div className="absolute -top-24 -right-24 w-72 h-72 bg-fidaro-green-bright/25 rounded-full blur-3xl" />
                 </>
               )}
               <div className="relative">
@@ -115,7 +115,7 @@ export default function PricingSection() {
                   <a
                     href="#contact"
                     data-testid="investment-plan-cta"
-                    className="mt-9 w-full inline-flex items-center justify-center bg-fidaro-ink text-white hover:bg-black rounded-full px-6 py-4 text-sm font-semibold transition-colors"
+                    className="mt-9 w-full inline-flex items-center justify-center bg-white text-fidaro-green-dark hover:bg-fidaro-green-light rounded-full px-6 py-4 text-sm font-semibold transition-colors"
                   >
                     {card.cta}
                   </a>
@@ -130,7 +130,7 @@ export default function PricingSection() {
 
       {showQuickForm && (
         <div
-          className="fixed inset-0 z-50 bg-fidaro-darker/85 backdrop-blur flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-fidaro-green-dark/45 backdrop-blur flex items-center justify-center p-4"
           data-testid="quickscan-modal"
         >
           <div className="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl">
@@ -177,7 +177,7 @@ export default function PricingSection() {
                 data-testid="qs-pay-btn"
                 onClick={handleCheckout}
                 disabled={loading}
-                className="flex-1 bg-fidaro-ink hover:bg-black disabled:opacity-60 text-white rounded-full px-4 py-3 font-semibold transition-colors flex items-center justify-center gap-2"
+                className="flex-1 bg-fidaro-green hover:bg-fidaro-green-dark disabled:opacity-60 text-white rounded-full px-4 py-3 font-semibold transition-colors flex items-center justify-center gap-2 shadow-[0_6px_22px_rgba(79,111,87,0.3)]"
               >
                 {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                 {lang === "nl" ? "Betaal € 99" : "Pay € 99"}

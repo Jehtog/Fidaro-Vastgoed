@@ -9,7 +9,7 @@ const STEPS = {
     { tag: "Q4 2026", title: "Belgium Study", desc: "Marktverkenning Vlaanderen voor uitbreiding van de validatie­dienst.", status: "future" },
   ],
   en: [
-    { tag: "Q1 2026", title: "Quick-Scan MVP", desc: "€99 lighter property review — tests willingness-to-pay.", status: "active" },
+    { tag: "Q1 2026", title: "Quick-Scan", desc: "€99 lighter property review — independent first validation.", status: "active" },
     { tag: "Q2 2026", title: "Investment Plan", desc: "Full €750 validation report with scenarios.", status: "next" },
     { tag: "Q3 2026", title: "Partnerships", desc: "Collaboration with mortgage advisors, lawyers, notaries.", status: "future" },
     { tag: "Q4 2026", title: "Belgium Study", desc: "Market study Flanders to expand the validation service.", status: "future" },

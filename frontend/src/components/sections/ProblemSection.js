@@ -44,8 +44,8 @@ export default function ProblemSection() {
           })}
         </div>
 
-        <div className="mt-14 max-w-4xl rounded-3xl bg-gradient-to-br from-fidaro-darker to-fidaro-dark text-white p-8 md:p-10 fidaro-grain relative">
-          <p className="relative font-display text-2xl md:text-3xl leading-snug">
+        <div className="mt-14 max-w-4xl rounded-3xl bg-fidaro-green-light/70 border-l-4 border-fidaro-green text-fidaro-ink p-8 md:p-10 relative">
+          <p className="relative font-display text-2xl md:text-3xl leading-snug text-fidaro-green-dark">
             "{t.problem.callout}"
           </p>
         </div>

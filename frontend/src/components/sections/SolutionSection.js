@@ -25,7 +25,7 @@ export default function SolutionSection() {
               <div
                 key={i}
                 data-testid={`outcome-card-${i}`}
-                className="group relative rounded-3xl border border-fidaro-green-light bg-white p-7 hover:bg-fidaro-ink hover:border-fidaro-ink hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+                className="group relative rounded-3xl border border-fidaro-green-light bg-white p-7 hover:bg-fidaro-green-dark hover:border-fidaro-green-dark hover:-translate-y-1 transition-all duration-300 overflow-hidden"
               >
                 <div className="absolute top-0 right-0 font-mono text-xs text-fidaro-text-muted/40 group-hover:text-white/30 px-4 py-3">
                   0{i + 1}

@@ -9,6 +9,7 @@ import { jsPDF } from "jspdf";
 import "jspdf-autotable";
 // Also keep the function form available as a fallback.
 import autoTableFn from "jspdf-autotable";
+import { determineRentCategory } from "./calculator";
 
 const callAutoTable = (doc, opts) => {
   if (typeof doc.autoTable === "function") {
@@ -96,7 +97,7 @@ const COPY = {
       duplex: "Duplex",
       other: "Anders",
     },
-    levers: {
+    leversMap: {
       distance: (v) => `Je staat ${v} punt(en) van de 187-puntsgrens (vrije sector).`,
       energy: "Een beter energielabel kan de WWS-score significant verhogen.",
       kitchen: "Keukenverbeteringen (inbouwapparatuur, langer aanrecht) kunnen punten toevoegen.",
@@ -170,7 +171,7 @@ const COPY = {
       duplex: "Duplex",
       other: "Other",
     },
-    levers: {
+    leversMap: {
       distance: (v) => `You are ${v} point(s) away from the 187-point free-sector threshold.`,
       energy: "Improving the energy label could significantly increase the WWS score.",
       kitchen: "Kitchen improvements (built-in appliances, longer countertop) may add points.",
@@ -212,6 +213,11 @@ const formatEuro = (n) =>
 export const generateWWSReport = async (input, result, lang = "nl") => {
   const L = COPY[lang] || COPY.nl;
   const doc = new jsPDF({ unit: "mm", format: "a4" });
+
+  // Defensive: jsPDF.text() crashes on non-strings. Always coerce.
+  const txt = (v) => String(v == null ? "" : v);
+  // Category may not be on result; derive from total.
+  const category = result.category || determineRentCategory(result.total);
 
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
@@ -302,24 +308,24 @@ export const generateWWSReport = async (input, result, lang = "nl") => {
   doc.text(String(result.total), margin + 6, y + 25);
 
   // Category right side
-  const catText = L.categories[result.category] || "";
+  const catText = L.categories[category] || "";
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(...FIDARO_GREEN_DARK);
-  doc.text(L.category.toUpperCase(), pageW - margin - 6, y + 7, { align: "right" });
+  doc.text(txt(L.category).toUpperCase(), pageW - margin - 6, y + 7, { align: "right" });
   doc.setFontSize(13);
   doc.setFont("helvetica", "bold");
-  doc.text(catText, pageW - margin - 6, y + 16, { align: "right" });
+  doc.text(txt(catText), pageW - margin - 6, y + 16, { align: "right" });
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(...FIDARO_TEXT_MUTED);
-  doc.text(L.distance.toUpperCase(), pageW - margin - 6, y + 23, { align: "right" });
+  doc.text(txt(L.distance).toUpperCase(), pageW - margin - 6, y + 23, { align: "right" });
   doc.setFontSize(11);
   doc.setTextColor(...FIDARO_TEXT_DARK);
   doc.setFont("helvetica", "bold");
   const distText = result.distanceTo187 > 0 ? `${result.distanceTo187} pt` : "≥ 187 ✓";
-  doc.text(distText, pageW - margin - 6, y + 29, { align: "right" });
+  doc.text(txt(distText), pageW - margin - 6, y + 29, { align: "right" });
 
   y += 40;
 
@@ -469,14 +475,15 @@ export const generateWWSReport = async (input, result, lang = "nl") => {
 
 const buildLevers = (input, result, L) => {
   const out = [];
-  if (result.distanceTo187 > 0) out.push(L.levers.distance(result.distanceTo187));
+  const M = L.leversMap;
+  if (result.distanceTo187 > 0) out.push(M.distance(result.distanceTo187));
   const lbl = input.energy_label;
   if (!lbl || ["C", "D", "E", "F", "G", "no_label"].includes(lbl)) {
-    out.push(L.levers.energy);
+    out.push(M.energy);
   }
-  if (input.no_outdoor_space) out.push(L.levers.no_outdoor);
-  if (result.breakdown.wozCapped) out.push(L.levers.woz_capped);
-  if (result.total >= 180 && result.total < 187) out.push(L.levers.close_threshold);
+  if (input.no_outdoor_space) out.push(M.no_outdoor);
+  if (result.breakdown.wozCapped) out.push(M.woz_capped);
+  if (result.total >= 180 && result.total < 187) out.push(M.close_threshold);
   return out;
 };
 
