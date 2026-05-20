@@ -48,6 +48,9 @@ class LeadCreate(BaseModel):
     message: Optional[str] = ""
     language: Optional[str] = "nl"
     source: Optional[str] = "contact_form"
+    agreed_to_price: Optional[bool] = False  # explicit consent to €750 for investment_plan
+    construction_year: Optional[str] = ""
+    woz_value: Optional[str] = ""
 
 
 class Lead(LeadCreate):

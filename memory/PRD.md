@@ -30,19 +30,16 @@ Build a professional, premium bilingual (NL/EN) marketing website for Fidaro Vas
 - WWS calculator full logic (config + calculator + translations + UI 4-step wizard)
 - PDF export module (jsPDF + autotable)
 
-### 2026-05-20 — Light advisory redesign + PDF fix
-- ✅ Removed every `bg-fidaro-ink` / `bg-fidaro-darker` dark panel from Landing + WWS Calculator
-- ✅ Footer rebuilt: light sage-cream with sage accents (was dark ink with green blur)
-- ✅ CookieBanner: light white with sage CTA (was dark)
-- ✅ ProblemSection callout: light sage with green left border (was dark gradient)
-- ✅ GapSection "Fidaro valideert" panel: sage green-dark (was ink)
-- ✅ AdvantageSection highlight column: sage green-dark (was ink)
-- ✅ SolutionSection hover: sage green-dark (was ink)
-- ✅ PricingSection popular card + modal backdrop + Investment Plan CTA: sage green-dark / white (was ink)
-- ✅ WWS Calculator step indicator active + results sidebar + next/finish button: sage (was ink)
-- ✅ CalculatorTeaser redesigned as premium sage gradient banner with mini-preview card (separates it visually from Quick-Scan)
-- ✅ Removed last "MVP" wording from RoadmapSection (renamed Quick-Scan tile)
-- ✅ **PDF EXPORT FIX**: Root cause was duplicate object key `levers` in COPY dictionary (string overwritten by object) — `doc.text(L.levers, ...)` was receiving an object and crashing jsPDF. Renamed object to `leversMap`, derived `category` locally via `determineRentCategory(result.total)`, and added defensive `String()` cast helper `txt()` for all `doc.text` arguments. **Verified end-to-end via Playwright: 3.4 MB valid 3-page PDF with %PDF-1.3 magic bytes, no JS console errors.**
+### 2026-05-20 — Light advisory redesign + PDF fix + Investment Plan request flow
+- ✅ Removed every `bg-fidaro-ink` / `bg-fidaro-darker` dark panel from Landing + WWS Calculator + Admin login
+- ✅ Footer + CookieBanner rebuilt light
+- ✅ Problem callout, Gap "Fidaro valideert", Advantage highlight, Solution hover, Pricing popular card + modal, WWS step indicator + results sidebar + next button → all sage (was ink)
+- ✅ CalculatorTeaser redesigned as premium sage gradient with mini-preview card
+- ✅ Removed last "MVP" wording from RoadmapSection
+- ✅ **PDF EXPORT FIX**: Duplicate object key `levers` in COPY dict — renamed to `leversMap`, category derived locally, defensive `String()` cast on all `doc.text` calls. Verified: valid 3-page PDF (3.4 MB) downloads cleanly, zero JS errors.
+- ✅ **Investment Plan €750 request flow** (`InvestmentPlanModal` in `PricingSection.js`): dedicated NL/EN modal with name/email (verplicht), phone/address/year/woz/message (optional), and a **mandatory explicit consent checkbox** "Ik begrijp dat het Investment Plan € 750 (incl. btw) kost en ga akkoord met dit tarief". Submit button disabled until consent ticked. On success: thank-you state in the same modal. Lead saved via `POST /api/leads` with `service=investment_plan`, `source=investment_plan_request`, `agreed_to_price=true`.
+- ✅ Backend `LeadCreate` model extended with `agreed_to_price`, `construction_year`, `woz_value`.
+- ✅ Admin dashboard: new "Akkoord €" column showing ✓ for consented Investment Plan leads + green "Investment Plan €750" badge in Dienst column.
 
 ## Backend Endpoints
 - `GET /api/` — health
