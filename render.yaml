@@ -4,3 +4,6 @@ services:
     env: static
     buildCommand: "npm install --legacy-peer-deps && npm run build"
     publishDir: "frontend/build"
+    routes:
+      - src: "/*"
+        dest: "/index.html"
