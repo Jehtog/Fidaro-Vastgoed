@@ -35,7 +35,6 @@ db = client[os.environ["DB_NAME"]]
 app = FastAPI(title="Fidaro Vastgoed API")
 
 # ===== CORS FIX =====
-# This must be added before the routes are included.
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
@@ -100,6 +99,12 @@ class AdminLoginRequest(BaseModel):
     password: str
 
 
+# Admin-only lead creation model.
+# This allows the admin portal to create a lead with a custom/past created_at date.
+class AdminLeadCreate(LeadCreate):
+    created_at: Optional[str] = None
+
+
 def verify_admin(authorization: Optional[str] = Header(None)):
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Missing token")
@@ -142,6 +147,21 @@ async def admin_login(payload: AdminLoginRequest):
 async def admin_get_leads(_: bool = Depends(verify_admin)):
     leads = await db.leads.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
     return leads
+
+
+# NEW: Admin-only endpoint to manually create leads with a chosen date/time.
+@api_router.post("/admin/leads", response_model=Lead)
+async def admin_create_lead(payload: AdminLeadCreate, _: bool = Depends(verify_admin)):
+    data = payload.model_dump()
+    custom_created_at = data.pop("created_at", None)
+
+    lead = Lead(**data)
+
+    if custom_created_at:
+        lead.created_at = custom_created_at
+
+    await db.leads.insert_one(lead.model_dump())
+    return lead
 
 
 @api_router.get("/admin/payments")
