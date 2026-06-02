@@ -9,12 +9,12 @@ services:
       - src: "/*"
         dest: "/index.html"
 
-  # ===== BACKEND (Python FastAPI Server) =====
+ # ===== BACKEND (Python FastAPI Server) =====
   - type: web
     name: fidaro-backend
     env: python
     buildCommand: "pip install fastapi uvicorn pymongo python-dotenv motor stripe pydantic email-validator || pip install -r requirements.txt"
-    startCommand: "uvicorn backend.server:app --host 0.0.0.0 --port 10000"
+    startCommand: "PYTHONPATH=$PYTHONPATH:. uvicorn backend.server:app --host 0.0.0.0 --port 10000 || uvicorn server:app --host 0.0.0.0 --port 10000"
     envVars:
       - key: PYTHON_VERSION
         value: 3.14.3
