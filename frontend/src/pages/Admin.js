@@ -1,9 +1,25 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
-import { Lock, Loader2, LogOut } from "lucide-react";
+import { Lock, Loader2, LogOut, Plus } from "lucide-react";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+
+const emptyManualLead = {
+  name: "",
+  email: "",
+  phone: "",
+  property_address: "",
+  role: "",
+  service: "",
+  message: "",
+  language: "nl",
+  source: "manual_admin",
+  agreed_to_price: false,
+  construction_year: "",
+  woz_value: "",
+  created_at: "",
+};
 
 export default function Admin() {
   const [token, setToken] = useState(() => localStorage.getItem("fidaro_admin_token") || "");
@@ -11,7 +27,10 @@ export default function Admin() {
   const [leads, setLeads] = useState([]);
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [savingLead, setSavingLead] = useState(false);
   const [tab, setTab] = useState("leads");
+  const [showManualLeadForm, setShowManualLeadForm] = useState(false);
+  const [manualLead, setManualLead] = useState(emptyManualLead);
 
   const load = async (tok) => {
     setLoading(true);
@@ -53,6 +72,52 @@ export default function Admin() {
     setToken("");
     setLeads([]);
     setPayments([]);
+  };
+
+  const updateManualLead = (field, value) => {
+    setManualLead((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const createManualLead = async (e) => {
+    e.preventDefault();
+
+    if (!manualLead.name || !manualLead.email) {
+      toast.error("Naam en e-mail zijn verplicht");
+      return;
+    }
+
+    setSavingLead(true);
+
+    try {
+      const payload = {
+        ...manualLead,
+        created_at: manualLead.created_at
+          ? new Date(manualLead.created_at).toISOString()
+          : undefined,
+      };
+
+      const res = await axios.post(`${API}/admin/leads`, payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setLeads((prev) =>
+        [res.data, ...prev].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      );
+
+      setManualLead(emptyManualLead);
+      setShowManualLeadForm(false);
+      toast.success("Lead toegevoegd");
+    } catch (e) {
+      console.error(e);
+      toast.error("Lead toevoegen mislukt");
+    } finally {
+      setSavingLead(false);
+    }
   };
 
   if (!token) {
@@ -100,7 +165,7 @@ export default function Admin() {
       </header>
 
       <div className="max-w-7xl mx-auto px-6 md:px-10 py-10">
-        <div className="flex gap-2 mb-6">
+        <div className="flex flex-wrap gap-2 mb-6">
           <button
             data-testid="tab-leads"
             onClick={() => setTab("leads")}
@@ -128,61 +193,207 @@ export default function Admin() {
         )}
 
         {!loading && tab === "leads" && (
-          <div data-testid="leads-table" className="bg-white rounded-2xl border border-fidaro-green-light overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-fidaro-green-light/50 text-left">
-                  <tr>
-                    <th className="px-4 py-3">Datum</th>
-                    <th className="px-4 py-3">Naam</th>
-                    <th className="px-4 py-3">E-mail</th>
-                    <th className="px-4 py-3">Telefoon</th>
-                    <th className="px-4 py-3">Adres</th>
-                    <th className="px-4 py-3">Dienst</th>
-                    <th className="px-4 py-3">Akkoord €</th>
-                    <th className="px-4 py-3">Bron</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {leads.map((l, i) => (
-                    <tr key={l.id || i} className="border-t border-fidaro-green-light/60">
-                      <td className="px-4 py-3 text-fidaro-text-muted">
-                        {new Date(l.created_at).toLocaleString()}
-                      </td>
-                      <td className="px-4 py-3 font-medium">{l.name}</td>
-                      <td className="px-4 py-3">{l.email}</td>
-                      <td className="px-4 py-3">{l.phone}</td>
-                      <td className="px-4 py-3">{l.property_address}</td>
-                      <td className="px-4 py-3">
-                        {l.service === "investment_plan" ? (
-                          <span className="inline-block px-2 py-1 rounded text-xs bg-fidaro-green text-white">
-                            Investment Plan €750
-                          </span>
-                        ) : (
-                          <span className="text-xs text-fidaro-text-muted">{l.service}</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        {l.agreed_to_price ? (
-                          <span className="text-fidaro-green-dark font-semibold">✓</span>
-                        ) : (
-                          <span className="text-fidaro-text-muted/40">—</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-xs text-fidaro-text-muted">{l.source}</td>
-                    </tr>
-                  ))}
-                  {leads.length === 0 && (
-                    <tr>
-                      <td colSpan="8" className="px-4 py-8 text-center text-fidaro-text-muted">
-                        Nog geen leads.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+          <>
+            <div className="mb-6 bg-white rounded-2xl border border-fidaro-green-light p-5">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                  <h2 className="font-serif text-xl text-fidaro-text-dark">
+                    Handmatige lead toevoegen
+                  </h2>
+                  <p className="text-sm text-fidaro-text-muted mt-1">
+                    Voeg zelf een lead toe met een gekozen datum en tijd.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setShowManualLeadForm((v) => !v)}
+                  className="inline-flex items-center justify-center gap-2 bg-fidaro-green hover:bg-fidaro-green-dark text-white rounded-xl px-5 py-3 text-sm font-medium transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                  {showManualLeadForm ? "Formulier sluiten" : "Lead toevoegen"}
+                </button>
+              </div>
+
+              {showManualLeadForm && (
+                <form onSubmit={createManualLead} className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <input
+                    type="text"
+                    value={manualLead.name}
+                    onChange={(e) => updateManualLead("name", e.target.value)}
+                    placeholder="Naam *"
+                    className="bg-fidaro-green-light/30 border border-fidaro-green-light rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-fidaro-green"
+                    required
+                  />
+
+                  <input
+                    type="email"
+                    value={manualLead.email}
+                    onChange={(e) => updateManualLead("email", e.target.value)}
+                    placeholder="E-mail *"
+                    className="bg-fidaro-green-light/30 border border-fidaro-green-light rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-fidaro-green"
+                    required
+                  />
+
+                  <input
+                    type="text"
+                    value={manualLead.phone}
+                    onChange={(e) => updateManualLead("phone", e.target.value)}
+                    placeholder="Telefoon"
+                    className="bg-fidaro-green-light/30 border border-fidaro-green-light rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-fidaro-green"
+                  />
+
+                  <input
+                    type="text"
+                    value={manualLead.property_address}
+                    onChange={(e) => updateManualLead("property_address", e.target.value)}
+                    placeholder="Adres"
+                    className="bg-fidaro-green-light/30 border border-fidaro-green-light rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-fidaro-green"
+                  />
+
+                  <select
+                    value={manualLead.role}
+                    onChange={(e) => updateManualLead("role", e.target.value)}
+                    className="bg-fidaro-green-light/30 border border-fidaro-green-light rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-fidaro-green"
+                  >
+                    <option value="">Rol kiezen</option>
+                    <option value="owner">Eigenaar</option>
+                    <option value="buyer">Koper</option>
+                  </select>
+
+                  <select
+                    value={manualLead.service}
+                    onChange={(e) => updateManualLead("service", e.target.value)}
+                    className="bg-fidaro-green-light/30 border border-fidaro-green-light rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-fidaro-green"
+                  >
+                    <option value="">Dienst kiezen</option>
+                    <option value="quickscan">Quickscan</option>
+                    <option value="investment_plan">Investment Plan</option>
+                    <option value="consult">Consult</option>
+                  </select>
+
+                  <input
+                    type="text"
+                    value={manualLead.construction_year}
+                    onChange={(e) => updateManualLead("construction_year", e.target.value)}
+                    placeholder="Bouwjaar"
+                    className="bg-fidaro-green-light/30 border border-fidaro-green-light rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-fidaro-green"
+                  />
+
+                  <input
+                    type="text"
+                    value={manualLead.woz_value}
+                    onChange={(e) => updateManualLead("woz_value", e.target.value)}
+                    placeholder="WOZ-waarde"
+                    className="bg-fidaro-green-light/30 border border-fidaro-green-light rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-fidaro-green"
+                  />
+
+                  <label className="md:col-span-2 text-sm text-fidaro-text-muted">
+                    Datum en tijd
+                    <input
+                      type="datetime-local"
+                      value={manualLead.created_at}
+                      onChange={(e) => updateManualLead("created_at", e.target.value)}
+                      className="mt-2 w-full bg-fidaro-green-light/30 border border-fidaro-green-light rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-fidaro-green"
+                    />
+                  </label>
+
+                  <textarea
+                    value={manualLead.message}
+                    onChange={(e) => updateManualLead("message", e.target.value)}
+                    placeholder="Bericht"
+                    rows="3"
+                    className="md:col-span-2 bg-fidaro-green-light/30 border border-fidaro-green-light rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-fidaro-green"
+                  />
+
+                  <label className="md:col-span-2 flex items-center gap-3 text-sm text-fidaro-text-dark">
+                    <input
+                      type="checkbox"
+                      checked={manualLead.agreed_to_price}
+                      onChange={(e) => updateManualLead("agreed_to_price", e.target.checked)}
+                      className="w-4 h-4"
+                    />
+                    Akkoord met prijs
+                  </label>
+
+                  <div className="md:col-span-2 flex flex-col sm:flex-row gap-3">
+                    <button
+                      type="submit"
+                      disabled={savingLead}
+                      className="inline-flex items-center justify-center gap-2 bg-fidaro-green hover:bg-fidaro-green-dark disabled:opacity-60 text-white rounded-xl px-6 py-3 text-sm font-medium transition-colors"
+                    >
+                      {savingLead && <Loader2 className="w-4 h-4 animate-spin" />}
+                      Lead opslaan
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setManualLead(emptyManualLead)}
+                      className="bg-white border border-fidaro-green-light text-fidaro-text-dark rounded-xl px-6 py-3 text-sm font-medium"
+                    >
+                      Leegmaken
+                    </button>
+                  </div>
+                </form>
+              )}
             </div>
-          </div>
+
+            <div data-testid="leads-table" className="bg-white rounded-2xl border border-fidaro-green-light overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-fidaro-green-light/50 text-left">
+                    <tr>
+                      <th className="px-4 py-3">Datum</th>
+                      <th className="px-4 py-3">Naam</th>
+                      <th className="px-4 py-3">E-mail</th>
+                      <th className="px-4 py-3">Telefoon</th>
+                      <th className="px-4 py-3">Adres</th>
+                      <th className="px-4 py-3">Dienst</th>
+                      <th className="px-4 py-3">Akkoord €</th>
+                      <th className="px-4 py-3">Bron</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {leads.map((l, i) => (
+                      <tr key={l.id || i} className="border-t border-fidaro-green-light/60">
+                        <td className="px-4 py-3 text-fidaro-text-muted">
+                          {new Date(l.created_at).toLocaleString()}
+                        </td>
+                        <td className="px-4 py-3 font-medium">{l.name}</td>
+                        <td className="px-4 py-3">{l.email}</td>
+                        <td className="px-4 py-3">{l.phone}</td>
+                        <td className="px-4 py-3">{l.property_address}</td>
+                        <td className="px-4 py-3">
+                          {l.service === "investment_plan" ? (
+                            <span className="inline-block px-2 py-1 rounded text-xs bg-fidaro-green text-white">
+                              Investment Plan €750
+                            </span>
+                          ) : (
+                            <span className="text-xs text-fidaro-text-muted">{l.service}</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          {l.agreed_to_price ? (
+                            <span className="text-fidaro-green-dark font-semibold">✓</span>
+                          ) : (
+                            <span className="text-fidaro-text-muted/40">—</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-xs text-fidaro-text-muted">{l.source}</td>
+                      </tr>
+                    ))}
+                    {leads.length === 0 && (
+                      <tr>
+                        <td colSpan="8" className="px-4 py-8 text-center text-fidaro-text-muted">
+                          Nog geen leads.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
         )}
 
         {!loading && tab === "payments" && (
