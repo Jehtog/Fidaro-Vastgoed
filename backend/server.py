@@ -6,7 +6,7 @@ import os
 import logging
 from pathlib import Path
 from pydantic import BaseModel, Field, EmailStr
-from typing import List, Optional, Dict
+from typing import Optional, Dict
 import uuid
 from datetime import datetime, timezone
 
@@ -15,13 +15,14 @@ try:
     from emergentintegrations.payments.stripe.checkout import (
         StripeCheckout,
         CheckoutSessionResponse,
-        CheckoutStatusResponse,
         CheckoutSessionRequest,
     )
+
     EMERGENT_AVAILABLE = True
 except ModuleNotFoundError:
     logging.warning("Emergent pakket niet gevonden. Stripe checkout flows gebruiken fallback.")
     EMERGENT_AVAILABLE = False
+
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / ".env")
@@ -32,11 +33,32 @@ client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ["DB_NAME"]]
 
 app = FastAPI(title="Fidaro Vastgoed API")
+
+# ===== CORS FIX =====
+# This must be added before the routes are included.
+app.add_middleware(
+    CORSMiddleware,
+    allow_credentials=True,
+    allow_origins=[
+        "https://fidaro-vastgoed.onrender.com",
+        "https://fidaro-backend.onrender.com",
+        "http://localhost:3000",
+        "http://localhost:5173",
+    ],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 api_router = APIRouter(prefix="/api")
 
-# ===== Fixed packages (server-side only) =====
+
+# ===== Fixed packages server-side only =====
 PACKAGES: Dict[str, Dict] = {
-    "quickscan": {"amount": 99.00, "currency": "eur", "name": "Fidaro Quick-Scan"},
+    "quickscan": {
+        "amount": 99.00,
+        "currency": "eur",
+        "name": "Fidaro Quick-Scan",
+    },
 }
 
 STRIPE_API_KEY = os.environ.get("STRIPE_API_KEY", "sk_test_emergent")
@@ -81,16 +103,22 @@ class AdminLoginRequest(BaseModel):
 def verify_admin(authorization: Optional[str] = Header(None)):
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Missing token")
+
     token = authorization.replace("Bearer ", "")
+
     if token != ADMIN_PASSWORD:
         raise HTTPException(status_code=401, detail="Invalid token")
+
     return True
 
 
 # ===== Routes =====
 @api_router.get("/")
 async def root():
-    return {"service": "Fidaro Vastgoed API", "status": "ok"}
+    return {
+        "service": "Fidaro Vastgoed API",
+        "status": "ok",
+    }
 
 
 @api_router.post("/leads", response_model=Lead)
@@ -104,7 +132,10 @@ async def create_lead(payload: LeadCreate):
 async def admin_login(payload: AdminLoginRequest):
     if payload.password != ADMIN_PASSWORD:
         raise HTTPException(status_code=401, detail="Invalid password")
-    return {"token": ADMIN_PASSWORD}
+
+    return {
+        "token": ADMIN_PASSWORD,
+    }
 
 
 @api_router.get("/admin/leads")
@@ -146,12 +177,12 @@ async def create_checkout_session(payload: CheckoutCreateRequest, request: Reque
         "language": payload.language or "nl",
     }
 
-    # Fallback als Emergent pakket ontbreekt (op Render)
+    # Fallback als Emergent pakket ontbreekt op Render
     if not EMERGENT_AVAILABLE:
         logging.warning("StripeCheckout overgeslagen wegens ontbrekende Emergent module.")
-        # Genereer een dummy sessie-id zodat de flow niet keihard crasht
+
         fake_session_id = f"cs_render_{uuid.uuid4().hex[:12]}"
-        
+
         tx_doc = {
             "id": str(uuid.uuid4()),
             "session_id": fake_session_id,
@@ -164,8 +195,9 @@ async def create_checkout_session(payload: CheckoutCreateRequest, request: Reque
             "created_at": datetime.now(timezone.utc).isoformat(),
             "updated_at": datetime.now(timezone.utc).isoformat(),
         }
+
         await db.payment_transactions.insert_one(tx_doc)
-        
+
         if payload.email:
             lead_doc = Lead(
                 name=payload.name or "",
@@ -174,15 +206,19 @@ async def create_checkout_session(payload: CheckoutCreateRequest, request: Reque
                 property_address=payload.property_address or "",
                 role="buyer",
                 service="quickscan",
-                message="Quick-Scan checkout initiated (Render Environment)",
+                message="Quick-Scan checkout initiated Render Environment",
                 language=payload.language or "nl",
                 source="quickscan_checkout",
             ).model_dump()
-            await db.leads.insert_one(lead_doc)
-            
-        return {"url": f"{origin}/success?session_id={fake_session_id}", "session_id": fake_session_id}
 
-    # Originele Emergent Stripe code (draait als de module wel bestaat)
+            await db.leads.insert_one(lead_doc)
+
+        return {
+            "url": f"{origin}/success?session_id={fake_session_id}",
+            "session_id": fake_session_id,
+        }
+
+    # Originele Emergent Stripe code
     stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=webhook_url)
 
     checkout_request = CheckoutSessionRequest(
@@ -193,7 +229,9 @@ async def create_checkout_session(payload: CheckoutCreateRequest, request: Reque
         metadata=metadata,
     )
 
-    session: CheckoutSessionResponse = await stripe_checkout.create_checkout_session(checkout_request)
+    session: CheckoutSessionResponse = await stripe_checkout.create_checkout_session(
+        checkout_request
+    )
 
     tx_doc = {
         "id": str(uuid.uuid4()),
@@ -207,6 +245,7 @@ async def create_checkout_session(payload: CheckoutCreateRequest, request: Reque
         "created_at": datetime.now(timezone.utc).isoformat(),
         "updated_at": datetime.now(timezone.utc).isoformat(),
     }
+
     await db.payment_transactions.insert_one(tx_doc)
 
     if payload.email:
@@ -221,14 +260,22 @@ async def create_checkout_session(payload: CheckoutCreateRequest, request: Reque
             language=payload.language or "nl",
             source="quickscan_checkout",
         ).model_dump()
+
         await db.leads.insert_one(lead_doc)
 
-    return {"url": session.url, "session_id": session.session_id}
+    return {
+        "url": session.url,
+        "session_id": session.session_id,
+    }
 
 
 @api_router.get("/payments/v1/checkout/status/{session_id}")
 async def get_checkout_status(session_id: str, request: Request):
-    existing = await db.payment_transactions.find_one({"session_id": session_id}, {"_id": 0})
+    existing = await db.payment_transactions.find_one(
+        {"session_id": session_id},
+        {"_id": 0},
+    )
+
     if not existing:
         return {
             "status": "open",
@@ -240,12 +287,16 @@ async def get_checkout_status(session_id: str, request: Request):
 
     try:
         import stripe as _stripe
+
         _stripe.api_key = STRIPE_API_KEY
+
         if "sk_test_emergent" in STRIPE_API_KEY:
             _stripe.api_base = "https://integrations.emergentagent.com/stripe"
+
         session = _stripe.checkout.Session.retrieve(session_id)
         payment_status = session.get("payment_status")
         session_status = session.get("status")
+
         if payment_status and existing.get("payment_status") != "paid":
             await db.payment_transactions.update_one(
                 {"session_id": session_id},
@@ -257,10 +308,12 @@ async def get_checkout_status(session_id: str, request: Request):
                     }
                 },
             )
+
             existing["payment_status"] = payment_status
             existing["status"] = session_status
+
     except Exception as e:
-        logging.warning(f"Stripe sync skipped (using DB cache): {e}")
+        logging.warning(f"Stripe sync skipped using DB cache: {e}")
 
     return {
         "status": existing.get("status", "open"),
@@ -274,13 +327,17 @@ async def get_checkout_status(session_id: str, request: Request):
 @api_router.post("/webhook/stripe")
 async def stripe_webhook(request: Request):
     if not EMERGENT_AVAILABLE:
-        return {"received": True, "note": "Webhook ignored on Render fallback"}
+        return {
+            "received": True,
+            "note": "Webhook ignored on Render fallback",
+        }
 
     body = await request.body()
     signature = request.headers.get("Stripe-Signature")
 
     host_url = str(request.base_url).rstrip("/")
     webhook_url = f"{host_url}/api/webhook/stripe"
+
     stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=webhook_url)
 
     try:
@@ -300,23 +357,19 @@ async def stripe_webhook(request: Request):
             },
         )
 
-    return {"received": True}
+    return {
+        "received": True,
+    }
 
 
 app.include_router(api_router)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=os.environ.get("CORS_ORIGINS", "*").split(","),
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
+
 logger = logging.getLogger(__name__)
 
 
