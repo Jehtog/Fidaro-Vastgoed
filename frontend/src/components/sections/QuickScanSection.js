@@ -77,8 +77,8 @@ export default function QuickScanSection() {
             </div>
             <p className="mt-3 text-fidaro-text-muted text-sm max-w-md">
               {lang === "nl"
-                ? "Eerste, scherpe panddoorlichting binnen 48 uur. Veilig betalen via Stripe."
-                : "Sharp first review within 48 hours. Secure payment via Stripe."}
+                ? "Ontvang een eerste haalbaarheidscheck binnen 48 uur. Veilig betalen via Stripe."
+                : "Receive a first feasibility review within 48 hours. Secure payment via Stripe."}
             </p>
 
             <div className="mt-7 space-y-3">

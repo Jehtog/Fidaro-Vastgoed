@@ -10,7 +10,7 @@ export default function ContactSection() {
   const { t, lang } = useLang();
   const [form, setForm] = useState({
     name: "", email: "", phone: "", property_address: "",
-    role: "buyer", service: "quickscan", message: "",
+    role: "", service: "quickscan", message: "",
   });
   const [loading, setLoading] = useState(false);
 
@@ -24,7 +24,7 @@ export default function ContactSection() {
     try {
       await axios.post(`${API}/leads`, { ...form, language: lang, source: "contact_form" });
       toast.success(t.contact.success);
-      setForm({ name: "", email: "", phone: "", property_address: "", role: "buyer", service: "quickscan", message: "" });
+      setForm({ name: "", email: "", phone: "", property_address: "", role: "", service: "quickscan", message: "" });
     } catch { toast.error(t.contact.error); }
     finally { setLoading(false); }
   };
@@ -66,8 +66,11 @@ export default function ContactSection() {
           <input data-testid="contact-phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder={t.contact.fields.phone} className={inputCls} />
           <input data-testid="contact-address" value={form.property_address} onChange={(e) => setForm({ ...form, property_address: e.target.value })} placeholder={t.contact.fields.address} className={inputCls} />
           <select data-testid="contact-role" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} className={inputCls}>
+            <option value="" disabled>{t.contact.fields.role}</option>
             <option value="buyer">{t.contact.fields.role_buyer}</option>
             <option value="owner">{t.contact.fields.role_owner}</option>
+            <option value="investor">{t.contact.fields.role_investor}</option>
+            <option value="broker">{t.contact.fields.role_broker}</option>
           </select>
           <select data-testid="contact-service" value={form.service} onChange={(e) => setForm({ ...form, service: e.target.value })} className={inputCls}>
             <option value="quickscan">{t.contact.fields.service_q}</option>

@@ -31,6 +31,15 @@ export default function StatsSection() {
           ))}
         </div>
 
+        {t.stats.note && (
+          <p
+            data-testid="stats-research-note"
+            className="mt-5 text-xs uppercase tracking-[0.18em] font-mono text-fidaro-text-muted"
+          >
+            {t.stats.note}
+          </p>
+        )}
+
         <p className="mt-12 max-w-3xl text-lg text-fidaro-ink leading-relaxed">
           {t.stats.interpretation}
         </p>

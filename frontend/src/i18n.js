@@ -60,13 +60,12 @@ export const translations = {
       features: [
         "WWS-audit en puntenbepaling",
         "ROI-modellering met scenario's",
-        "Box 3 en fiscale impact-analyse",
+        "Indicatieve Box 3-impact schatting",
         "Renovatie- en energielabel-strategie",
         "Indicatie van huurpotentieel",
-        "Optionele property sourcing",
       ],
       sourcingNote:
-        "Optionele sourcing kan apart worden besproken — validatie blijft de kerndienst.",
+        "Optionele sourcing kan apart worden besproken — validatie blijft de kerndienst van Fidaro.",
       cta: "Vraag Investment Plan aan",
     },
     quickscan: {
@@ -88,9 +87,10 @@ export const translations = {
       label: "Marktrealiteit",
       title: "Onzekerheid bij beleggers is reëel.",
       items: [
-        { value: "67%", label: "noemt de Nederlandse huurmarkt zeer complex" },
-        { value: "88%", label: "overweegt te betalen voor onafhankelijk advies" },
+        { value: "75%", label: "noemt de Nederlandse huurmarkt zeer complex" },
+        { value: "92%", label: "is bereid of open om voor onafhankelijk advies te betalen" },
       ],
+      note: "Op basis van Fidaro primair onderzoek, n = 78.",
       interpretation:
         "Ons onderzoek bevestigt wat veel beleggers al voelen: de uitdaging is niet alleen het vinden van een pand, maar weten of die investering nog steeds rendabel is onder de huidige regels.",
     },
@@ -144,7 +144,7 @@ export const translations = {
           features: [
             "Volledige WWS-audit",
             "ROI-modellering met scenario's",
-            "Box 3 / fiscale impact",
+            "Indicatieve Box 3-impact",
             "Renovatie- & energiestrategie",
             "Huurpotentieel-indicatie",
             "Persoonlijk adviesgesprek",
@@ -207,9 +207,11 @@ export const translations = {
         email: "E-mail",
         phone: "Telefoonnummer",
         address: "Adres van het pand",
-        role: "Ben je koper of eigenaar?",
+        role: "Investor type",
         role_owner: "Eigenaar",
         role_buyer: "Koper",
+        role_investor: "Belegger",
+        role_broker: "Makelaar / partner",
         service: "Gewenste dienst",
         service_q: "Quick-Scan (€99)",
         service_p: "Investment Plan (€750)",
@@ -303,13 +305,12 @@ export const translations = {
       features: [
         "WWS audit and point calculation",
         "ROI modelling with scenarios",
-        "Box 3 and tax impact analysis",
+        "Indicative Box 3 impact estimate",
         "Renovation and energy label strategy",
         "Rent potential indication",
-        "Optional property sourcing",
       ],
       sourcingNote:
-        "Optional sourcing can be discussed separately, but validation remains the core service.",
+        "Optional sourcing can be discussed separately. Validation remains Fidaro's core service.",
       cta: "Request Investment Plan",
     },
     quickscan: {
@@ -331,9 +332,10 @@ export const translations = {
       label: "Market reality",
       title: "Investor uncertainty is real.",
       items: [
-        { value: "67%", label: "say the Dutch rental market is highly complex" },
-        { value: "88%", label: "would consider paying for advisory support" },
+        { value: "75%", label: "rate the Dutch rental market as highly complex" },
+        { value: "92%", label: "are willing or open to paying for advisory support" },
       ],
+      note: "Based on Fidaro primary research, n = 78.",
       interpretation:
         "Our research confirms what many investors already feel: the challenge is not only finding a property, but knowing whether the investment still makes sense under today's rules.",
     },
@@ -381,7 +383,7 @@ export const translations = {
           features: [
             "Full WWS audit",
             "ROI modelling with scenarios",
-            "Box 3 / tax impact",
+            "Indicative Box 3 impact",
             "Renovation & energy strategy",
             "Rent potential indication",
             "Personal advisory call",
@@ -443,9 +445,11 @@ export const translations = {
         email: "Email",
         phone: "Phone",
         address: "Property address",
-        role: "Are you buying or already owning the property?",
-        role_owner: "Owner",
+        role: "Investor type",
+        role_owner: "Property owner",
         role_buyer: "Buyer",
+        role_investor: "Investor",
+        role_broker: "Broker / partner",
         service: "Desired service",
         service_q: "Quick-Scan (€99)",
         service_p: "Investment Plan (€750)",
