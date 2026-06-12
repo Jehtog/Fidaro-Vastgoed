@@ -9,6 +9,7 @@ import LegalPage from "./pages/LegalPage";
 import WWSCalculator from "./pages/WWSCalculator";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import CookieBanner from "./components/CookieBanner";
+import WhatsAppButton from "./components/WhatsAppButton";
 
 function App() {
   useEffect(() => {
@@ -28,6 +29,7 @@ function App() {
             <Route path="/wws-calculator" element={<WWSCalculator />} />
           </Routes>
           <CookieBanner />
+          <WhatsAppButton />
         </BrowserRouter>
         <Toaster position="top-right" richColors />
       </LanguageProvider>
