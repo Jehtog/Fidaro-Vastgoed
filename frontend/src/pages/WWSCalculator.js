@@ -14,6 +14,8 @@ import {
   Ruler,
   Receipt,
   Sparkles,
+  ShieldCheck,
+  Phone,
 } from "lucide-react";
 import { useLang } from "../contexts/LanguageContext";
 import { wwsT } from "../wws/translations";
@@ -492,18 +494,23 @@ export default function WWSCalculator() {
           )}
 
           {step === 3 && (
-            <StepCard title={SL.results}>
-              <p className="text-sm text-fidaro-text-muted">
-                {lang === "nl"
-                  ? "Bekijk je indicatieve uitkomst rechts. Download het PDF-rapport of vraag een Quick-Scan aan voor een onafhankelijke validatie."
-                  : "See your indicative outcome on the right. Download the PDF report or request a Quick-Scan for independent validation."}
-              </p>
-              <div className="mt-4 grid md:grid-cols-3 gap-3">
-                <MiniStat label={lang === "nl" ? "Bouwjaar" : "Year"} value={s.year || "—"} />
-                <MiniStat label={lang === "nl" ? "Energielabel" : "Energy label"} value={s.energy_label || "—"} />
-                <MiniStat label="WOZ" value={s.woz_value ? `€ ${Number(s.woz_value).toLocaleString("nl-NL")}` : "—"} />
-              </div>
-            </StepCard>
+            <>
+              <StepCard title={SL.results}>
+                <p className="text-sm text-fidaro-text-muted">
+                  {lang === "nl"
+                    ? "Bekijk je indicatieve uitkomst rechts. Download het PDF-rapport of vraag een Quick-Scan aan voor een onafhankelijke validatie."
+                    : "See your indicative outcome on the right. Download the PDF report or request a Quick-Scan for independent validation."}
+                </p>
+                <div className="mt-4 grid md:grid-cols-3 gap-3">
+                  <MiniStat label={lang === "nl" ? "Bouwjaar" : "Year"} value={s.year || "—"} />
+                  <MiniStat label={lang === "nl" ? "Energielabel" : "Energy label"} value={s.energy_label || "—"} />
+                  <MiniStat label="WOZ" value={s.woz_value ? `€ ${Number(s.woz_value).toLocaleString("nl-NL")}` : "—"} />
+                </div>
+              </StepCard>
+
+              {/* Pand-toetsen upsell banner — contextual to the score */}
+              <UpsellBanner result={result} category={category} lang={lang} />
+            </>
           )}
 
           {/* Step nav buttons */}
@@ -682,6 +689,130 @@ function MiniStat({ label, value }) {
     <div className="rounded-xl border border-fidaro-green-light bg-fidaro-green-light/30 p-3">
       <div className="text-[10px] uppercase tracking-widest text-fidaro-text-muted">{label}</div>
       <div className="mt-1 text-sm font-bold tabular text-fidaro-ink">{value}</div>
+    </div>
+  );
+}
+
+// Contextual upsell banner shown on the results step.
+// Copy adapts to the score range so it nudges the right next step.
+function UpsellBanner({ result, category, lang }) {
+  const total = result?.total || 0;
+  const distance = result?.distanceTo187 || 0;
+
+  let context;
+  if (category === "free") {
+    context = lang === "nl"
+      ? {
+          eyebrow: "Vrije sector kansrijk",
+          title: "Je pand zit boven de 187-puntsgrens.",
+          body: "Een Fidaro Quick-Scan bevestigt of je écht in de vrije sector kan verhuren en welke huurprijs realistisch is.",
+        }
+      : {
+          eyebrow: "Free-sector potential",
+          title: "Your property is above the 187-point threshold.",
+          body: "A Fidaro Quick-Scan confirms whether you can actually rent in the free sector and what rent is realistic.",
+        };
+  } else if (total >= 180 && total < 187) {
+    context = lang === "nl"
+      ? {
+          eyebrow: "Dicht bij 187",
+          title: `Je zit slechts ${distance} punt(en) van de vrije sector.`,
+          body: "Een Quick-Scan toont je hoe je deze marge overbrugt — vaak met één gerichte ingreep (energielabel, keuken, badkamer).",
+        }
+      : {
+          eyebrow: "Close to 187",
+          title: `You are only ${distance} point(s) from the free sector.`,
+          body: "A Quick-Scan shows you how to close this gap — often with one targeted intervention (energy label, kitchen, bathroom).",
+        };
+  } else if (category === "middle") {
+    context = lang === "nl"
+      ? {
+          eyebrow: "Middenhuur / reguleringsrisico",
+          title: "Je pand zit in het reguleringsbereik.",
+          body: "Een Fidaro validatie wijst de optimalisatie-hefbomen aan en berekent het ROI-scenario onder de huidige regels.",
+        }
+      : {
+          eyebrow: "Mid-rent / regulation risk",
+          title: "Your property sits within the regulated range.",
+          body: "A Fidaro validation pinpoints the optimisation levers and calculates the ROI scenario under current rules.",
+        };
+  } else {
+    context = lang === "nl"
+      ? {
+          eyebrow: "Sociale huur",
+          title: "Je pand valt onder de sociale huurgrens.",
+          body: "Een Fidaro Investment Plan brengt het potentieel én de risico's volledig in kaart vóór je investeert.",
+        }
+      : {
+          eyebrow: "Social rent",
+          title: "Your property falls under the social rent limit.",
+          body: "A Fidaro Investment Plan maps the full potential and risks before you invest.",
+        };
+  }
+
+  return (
+    <div
+      data-testid="wws-upsell-banner"
+      className="relative rounded-3xl bg-gradient-to-br from-fidaro-green-dark via-fidaro-green-dark to-fidaro-green p-7 md:p-9 text-white overflow-hidden shadow-[0_20px_50px_-20px_rgba(63,92,73,0.5)]"
+    >
+      <div className="absolute -top-20 -right-16 w-64 h-64 bg-fidaro-green-bright/25 rounded-full blur-3xl pointer-events-none" />
+      <div className="relative">
+        <div className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.22em] text-fidaro-green-bright font-mono px-2.5 py-1 rounded-full bg-white/10 border border-white/15">
+          <ShieldCheck className="w-3 h-3" />
+          {context.eyebrow}
+        </div>
+        <h3 className="mt-4 font-display text-2xl md:text-3xl tracking-tight leading-tight">
+          {context.title}
+        </h3>
+        <p className="mt-3 text-sm md:text-base text-white/80 leading-relaxed max-w-xl">
+          {context.body}
+        </p>
+
+        <div className="mt-6 grid sm:grid-cols-2 gap-3 max-w-2xl">
+          <a
+            href="/#pricing"
+            data-testid="wws-upsell-quickscan"
+            className="group rounded-2xl bg-white text-fidaro-green-dark p-5 hover:bg-fidaro-green-light transition-colors"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] uppercase tracking-[0.22em] font-mono text-fidaro-green">Quick-Scan</span>
+              <span className="font-display text-2xl tabular">€ 99</span>
+            </div>
+            <div className="mt-2 text-sm font-semibold flex items-center gap-1.5">
+              {lang === "nl" ? "Laat dit pand valideren" : "Validate this property"}
+              <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+            </div>
+            <div className="mt-1 text-xs text-fidaro-text-muted">
+              {lang === "nl" ? "Eerste validatie binnen 48u" : "First validation within 48h"}
+            </div>
+          </a>
+
+          <a
+            href="/#pricing"
+            data-testid="wws-upsell-plan"
+            className="group rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 p-5 transition-colors"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] uppercase tracking-[0.22em] font-mono text-fidaro-green-bright">Investment Plan</span>
+              <span className="font-display text-2xl tabular">€ 750</span>
+            </div>
+            <div className="mt-2 text-sm font-semibold flex items-center gap-1.5">
+              {lang === "nl" ? "Diepgaand rapport aanvragen" : "Request in-depth report"}
+              <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+            </div>
+            <div className="mt-1 text-xs text-white/55">
+              {lang === "nl" ? "Volledige scenario-analyse" : "Full scenario analysis"}
+            </div>
+          </a>
+        </div>
+
+        <div className="mt-5 flex items-center gap-2 text-xs text-white/65">
+          <Phone className="w-3.5 h-3.5" />
+          {lang === "nl"
+            ? "Liever even bellen? fidarovastgoed@gmail.com"
+            : "Prefer a quick call? fidarovastgoed@gmail.com"}
+        </div>
+      </div>
     </div>
   );
 }

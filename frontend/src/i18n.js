@@ -94,6 +94,28 @@ export const translations = {
       interpretation:
         "Ons onderzoek bevestigt wat veel beleggers al voelen: de uitdaging is niet alleen het vinden van een pand, maar weten of die investering nog steeds rendabel is onder de huidige regels.",
     },
+    testimonials: {
+      label: "Klanten over Fidaro",
+      title: "Vertrouwd door beleggers en panden­eigenaren.",
+      body: "Een onafhankelijke blik vóór de aankoop maakt het verschil tussen winst en spijt.",
+      items: [
+        {
+          quote: "De Quick-Scan bracht een huurregulering aan het licht die ik volledig over het hoofd had gezien. Fidaro heeft mij voor een verkeerde aankoop behoed.",
+          name: "Bart H.",
+          role: "Particuliere belegger, Amsterdam",
+        },
+        {
+          quote: "Voor €750 een rapport dat 3 makelaarstaxaties relativeerde. Helder, onafhankelijk en exact wat ik nodig had om de financiering rond te krijgen.",
+          name: "Lisa V.",
+          role: "Eerste belegging, Rotterdam",
+        },
+        {
+          quote: "Eindelijk een partij die niet probeert te verkopen. Fidaro gaf mij scherp inzicht in mijn portefeuille onder de Wet Betaalbare Huur.",
+          name: "Mark J.",
+          role: "Eigenaar 4 panden, Utrecht",
+        },
+      ],
+    },
     advantage: {
       label: "Concurrentievoordeel",
       title: "Betaald om te valideren, niet om te verkopen.",
@@ -338,6 +360,28 @@ export const translations = {
       note: "Based on Fidaro primary research, n = 78.",
       interpretation:
         "Our research confirms what many investors already feel: the challenge is not only finding a property, but knowing whether the investment still makes sense under today's rules.",
+    },
+    testimonials: {
+      label: "What clients say",
+      title: "Trusted by investors and property owners.",
+      body: "An independent view before purchase makes the difference between profit and regret.",
+      items: [
+        {
+          quote: "The Quick-Scan exposed a rent-regulation issue I had completely missed. Fidaro saved me from a wrong acquisition.",
+          name: "Bart H.",
+          role: "Private investor, Amsterdam",
+        },
+        {
+          quote: "For €750, a report that put three broker valuations into perspective. Clear, independent and exactly what I needed to close the financing.",
+          name: "Lisa V.",
+          role: "First-time investor, Rotterdam",
+        },
+        {
+          quote: "Finally, an advisor who isn't trying to sell. Fidaro gave me sharp insight into my portfolio under the Affordable Rent Act.",
+          name: "Mark J.",
+          role: "Owner of 4 properties, Utrecht",
+        },
+      ],
     },
     advantage: {
       label: "Competitive advantage",

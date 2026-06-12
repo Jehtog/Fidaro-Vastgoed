@@ -6,6 +6,7 @@ import GapSection from "../components/sections/GapSection";
 import QuickScanSection from "../components/sections/QuickScanSection";
 import ProductSection from "../components/sections/ProductSection";
 import StatsSection from "../components/sections/StatsSection";
+import TestimonialsSection from "../components/sections/TestimonialsSection";
 import AdvantageSection from "../components/sections/AdvantageSection";
 import PricingSection from "../components/sections/PricingSection";
 import ProcessSection from "../components/sections/ProcessSection";
@@ -24,6 +25,7 @@ export default function Landing() {
         <QuickScanSection />
         <ProductSection />
         <StatsSection />
+        <TestimonialsSection />
         <AdvantageSection />
         <PricingSection />
         <ProcessSection />
