@@ -183,7 +183,6 @@ export default function Admin() {
                     <th className="px-4 py-3">Adres</th>
                     <th className="px-4 py-3">Dienst</th>
                     <th className="px-4 py-3">Akkoord €</th>
-                    <th className="px-4 py-3">Bron</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -210,12 +209,11 @@ export default function Admin() {
                           <span className="text-fidaro-text-muted/40">—</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-xs text-fidaro-text-muted">{l.source}</td>
                     </tr>
                   ))}
                   {leads.length === 0 && (
                     <tr>
-                      <td colSpan="8" className="px-4 py-8 text-center text-fidaro-text-muted">Nog geen leads.</td>
+                      <td colSpan="7" className="px-4 py-8 text-center text-fidaro-text-muted">Nog geen leads.</td>
                     </tr>
                   )}
                 </tbody>
@@ -272,23 +270,9 @@ export default function Admin() {
           <div data-testid="scores-tab">
             {/* Top bar with stats + add button */}
             <div className="flex flex-wrap items-end justify-between gap-4 mb-5">
-              <div className="grid grid-cols-3 gap-3">
-                <div className="rounded-xl bg-white border border-fidaro-green-light px-4 py-3">
-                  <div className="text-[10px] uppercase tracking-widest text-fidaro-text-muted">Totaal</div>
-                  <div className="mt-0.5 text-2xl font-bold tabular text-fidaro-ink">{scores.length}</div>
-                </div>
-                <div className="rounded-xl bg-white border border-fidaro-green-light px-4 py-3">
-                  <div className="text-[10px] uppercase tracking-widest text-fidaro-text-muted">Automatisch</div>
-                  <div className="mt-0.5 text-2xl font-bold tabular text-fidaro-ink">
-                    {scores.filter((s) => s.source === "calculator_auto").length}
-                  </div>
-                </div>
-                <div className="rounded-xl bg-white border border-fidaro-green-light px-4 py-3">
-                  <div className="text-[10px] uppercase tracking-widest text-fidaro-text-muted">Handmatig</div>
-                  <div className="mt-0.5 text-2xl font-bold tabular text-fidaro-ink">
-                    {scores.filter((s) => s.source === "admin_manual").length}
-                  </div>
-                </div>
+              <div className="rounded-xl bg-white border border-fidaro-green-light px-5 py-3">
+                <div className="text-[10px] uppercase tracking-widest text-fidaro-text-muted">Totaal WWS-scores</div>
+                <div className="mt-0.5 text-2xl font-bold tabular text-fidaro-ink">{scores.length}</div>
               </div>
               <button
                 data-testid="add-score-btn"
@@ -311,7 +295,6 @@ export default function Admin() {
                       <th className="px-4 py-3">Adres</th>
                       <th className="px-4 py-3 text-right">Score</th>
                       <th className="px-4 py-3">Categorie</th>
-                      <th className="px-4 py-3">Bron</th>
                       <th className="px-4 py-3"></th>
                     </tr>
                   </thead>
@@ -340,9 +323,6 @@ export default function Admin() {
                             {categoryLabel(s.total)}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-xs text-fidaro-text-muted">
-                          {s.source === "admin_manual" ? "Handmatig" : "Automatisch"}
-                        </td>
                         <td className="px-4 py-3 text-right">
                           <button
                             data-testid={`delete-score-${i}`}
@@ -357,7 +337,7 @@ export default function Admin() {
                     ))}
                     {scores.length === 0 && (
                       <tr>
-                        <td colSpan="9" className="px-4 py-8 text-center text-fidaro-text-muted">
+                        <td colSpan="8" className="px-4 py-8 text-center text-fidaro-text-muted">
                           Nog geen WWS-scores opgenomen.
                         </td>
                       </tr>
