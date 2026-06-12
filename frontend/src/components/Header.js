@@ -37,10 +37,7 @@ export default function Header() {
     >
       <div className="max-w-7xl mx-auto px-6 md:px-10 h-20 flex items-center justify-between">
         <Link to="/" data-testid="header-logo" className="flex items-center gap-3 text-fidaro-ink">
-          <img src={LOGO_URL} alt="Fidaro Vastgoed" className="h-9 w-9 object-contain" />
-          <span className="font-display text-lg tracking-tight">
-            fidaro <span className="text-fidaro-green">vastgoed</span>
-          </span>
+          <img src={LOGO_URL} alt="Fidaro Vastgoed" className="h-14 w-14 object-contain" />
         </Link>
 
         <nav className="hidden lg:flex items-center gap-7">

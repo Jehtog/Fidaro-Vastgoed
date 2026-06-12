@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 import {
   ArrowLeft,
   ArrowRight,
@@ -24,6 +25,8 @@ import {
 import { KITCHEN_EXTRAS, BATHROOM_EXTRAS } from "../wws/config";
 import { generateWWSReport } from "../wws/pdfExport";
 import Footer from "../components/Footer";
+
+const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const initial = {
   address: "",
@@ -174,6 +177,25 @@ export default function WWSCalculator() {
   const levers = suggestImprovementLevers(numerizeInput(s), result);
   const progressPct = Math.max(0, Math.min(100, (result.total / 187) * 100));
 
+  // Auto-track: when user reaches step 3 (results) with a meaningful score, log it once.
+  const [tracked, setTracked] = useState(false);
+  useEffect(() => {
+    if (tracked) return;
+    if (step !== 3) return;
+    if (!result.total || result.total <= 0) return;
+    setTracked(true);
+    axios
+      .post(`${API}/wws-scores`, {
+        total: result.total,
+        category,
+        language: lang,
+        source: "calculator_auto",
+      })
+      .catch(() => {
+        // Silent — analytics tracking failures must not surface to the user.
+      });
+  }, [step, result.total, category, lang, tracked]);
+
   const energyLabels = ["A++++", "A+++", "A++", "A+", "A", "B", "C", "D", "E", "F", "G", "no_label"];
 
   const handlePDF = async () => {
@@ -195,12 +217,14 @@ export default function WWSCalculator() {
           <Link
             to="/"
             data-testid="wws-back-link"
-            className="inline-flex items-center gap-2 text-sm text-fidaro-ink hover:text-fidaro-green transition-colors"
+            className="inline-flex items-center gap-3 text-sm text-fidaro-ink hover:text-fidaro-green transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span className="font-display text-base tracking-tight">
-              fidaro <span className="text-fidaro-green">vastgoed</span>
-            </span>
+            <img
+              src="https://customer-assets.emergentagent.com/job_35e0d8c8-8484-434c-b0cb-1a5cfc9d3012/artifacts/p4sighyv_Untitled%20design%20%2811%29.png"
+              alt="Fidaro Vastgoed"
+              className="h-12 w-12 object-contain"
+            />
           </Link>
           <div className="flex items-center gap-3">
             <button

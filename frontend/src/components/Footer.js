@@ -15,10 +15,7 @@ export default function Footer() {
         <div className="grid md:grid-cols-12 gap-10 pb-12 border-b border-fidaro-green/15">
           <div className="md:col-span-5">
             <div className="flex items-center gap-3">
-              <img src={LOGO_URL} alt="Fidaro Vastgoed" className="h-10 w-10 object-contain" />
-              <span className="font-display text-2xl tracking-tight text-fidaro-ink">
-                fidaro <span className="text-fidaro-green">vastgoed</span>
-              </span>
+              <img src={LOGO_URL} alt="Fidaro Vastgoed" className="h-16 w-16 object-contain" />
             </div>
             <p className="mt-6 text-fidaro-text-muted text-xl font-display tracking-tight max-w-sm leading-tight">
               {t.footer.tagline}

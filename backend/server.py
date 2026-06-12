@@ -105,6 +105,42 @@ class AdminLeadCreate(LeadCreate):
     created_at: Optional[str] = None
 
 
+# ===== WWS Score tracking =====
+class WWSScoreCreate(BaseModel):
+    """Anonymous auto-tracked entry from the public calculator."""
+    total: float
+    category: Optional[str] = ""  # social / middle / free
+    language: Optional[str] = "nl"
+    source: Optional[str] = "calculator_auto"
+
+
+class WWSScoreAdminCreate(BaseModel):
+    """Manual entry from the admin portal — full client details + optional custom date."""
+    name: Optional[str] = ""
+    email: Optional[str] = ""
+    phone: Optional[str] = ""
+    property_address: Optional[str] = ""
+    total: float
+    category: Optional[str] = ""
+    note: Optional[str] = ""
+    created_at: Optional[str] = None  # ISO; if empty -> now
+    source: Optional[str] = "admin_manual"
+
+
+class WWSScore(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: Optional[str] = ""
+    email: Optional[str] = ""
+    phone: Optional[str] = ""
+    property_address: Optional[str] = ""
+    total: float
+    category: Optional[str] = ""
+    note: Optional[str] = ""
+    language: Optional[str] = "nl"
+    source: Optional[str] = "calculator_auto"
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+
 def verify_admin(authorization: Optional[str] = Header(None)):
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Missing token")
@@ -168,6 +204,46 @@ async def admin_create_lead(payload: AdminLeadCreate, _: bool = Depends(verify_a
 async def admin_get_payments(_: bool = Depends(verify_admin)):
     txs = await db.payment_transactions.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
     return txs
+
+
+# ===== WWS Scores =====
+@api_router.post("/wws-scores", response_model=WWSScore)
+async def create_wws_score(payload: WWSScoreCreate):
+    """Public anonymous auto-track from the calculator. No PII stored here."""
+    score = WWSScore(
+        total=payload.total,
+        category=payload.category or "",
+        language=payload.language or "nl",
+        source=payload.source or "calculator_auto",
+    )
+    await db.wws_scores.insert_one(score.model_dump())
+    return score
+
+
+@api_router.post("/admin/wws-scores", response_model=WWSScore)
+async def admin_create_wws_score(payload: WWSScoreAdminCreate, _: bool = Depends(verify_admin)):
+    """Admin manual entry — full client details + optional custom date/time."""
+    data = payload.model_dump()
+    custom_created_at = data.pop("created_at", None)
+    score = WWSScore(**data)
+    if custom_created_at:
+        score.created_at = custom_created_at
+    await db.wws_scores.insert_one(score.model_dump())
+    return score
+
+
+@api_router.get("/admin/wws-scores")
+async def admin_list_wws_scores(_: bool = Depends(verify_admin)):
+    rows = await db.wws_scores.find({}, {"_id": 0}).sort("created_at", -1).to_list(2000)
+    return rows
+
+
+@api_router.delete("/admin/wws-scores/{score_id}")
+async def admin_delete_wws_score(score_id: str, _: bool = Depends(verify_admin)):
+    res = await db.wws_scores.delete_one({"id": score_id})
+    if res.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Not found")
+    return {"ok": True}
 
 
 # ===== Stripe Payment Flow =====

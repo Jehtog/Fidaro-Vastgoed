@@ -15,12 +15,14 @@ export default function LegalPage({ kind }) {
           <Link
             to="/"
             data-testid="legal-back-link"
-            className="inline-flex items-center gap-2 text-sm text-fidaro-text-dark hover:text-fidaro-green transition-colors"
+            className="inline-flex items-center gap-3 text-sm text-fidaro-text-dark hover:text-fidaro-green transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span className="font-serif text-lg">
-              fidaro <span className="text-fidaro-green">vastgoed</span>
-            </span>
+            <img
+              src="https://customer-assets.emergentagent.com/job_35e0d8c8-8484-434c-b0cb-1a5cfc9d3012/artifacts/p4sighyv_Untitled%20design%20%2811%29.png"
+              alt="Fidaro Vastgoed"
+              className="h-12 w-12 object-contain"
+            />
           </Link>
           <div className="flex items-center text-xs border border-fidaro-green/30 rounded-full overflow-hidden">
             <button

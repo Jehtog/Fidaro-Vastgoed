@@ -30,7 +30,11 @@ Build a professional, premium bilingual (NL/EN) marketing website for Fidaro Vas
 - WWS calculator full logic (config + calculator + translations + UI 4-step wizard)
 - PDF export module (jsPDF + autotable)
 
-### 2026-05-20 — Light advisory redesign + PDF fix + Investment Plan request flow
+### 2026-06-12 — Logo cleanup + WWS-scores admin tracking
+- ✅ **Logo wordmark removed** from Header, Footer, WWSCalculator, Admin, LegalPage. Logo size increased (h-9→h-14 header, h-10→h-16 footer, h-12 on inner pages). Logo image already contains "fidaro vastgoed" text so the wordmark span was redundant.
+- ✅ **WWS-score tracking — backend** (`/api/wws-scores`, `/api/admin/wws-scores`): new `wws_scores` MongoDB collection with auto-track (anonymous: total + category + timestamp) and admin manual entry (full client details + custom `created_at`). Admin endpoints: GET list, POST manual create, DELETE by id.
+- ✅ **WWS Calculator auto-track**: silently POSTs anonymous score to `/api/wws-scores` when user reaches step 3 with total > 0, exactly once per session.
+- ✅ **Admin /admin "WWS-scores" tab** (3rd tab next to Leads + Betalingen): stats cards (Totaal / Automatisch / Handmatig), full table with datum+tijd / naam / e-mail / telefoon / adres / score / categorie badge / bron, delete-per-row, manual entry modal with name/email/phone/address/score/datetime-picker/note. Category auto-derived from score (<144 Sociaal, <187 Middenhuur, ≥187 Vrije sector).
 - ✅ Removed every `bg-fidaro-ink` / `bg-fidaro-darker` dark panel from Landing + WWS Calculator + Admin login
 - ✅ Footer + CookieBanner rebuilt light
 - ✅ Problem callout, Gap "Fidaro valideert", Advantage highlight, Solution hover, Pricing popular card + modal, WWS step indicator + results sidebar + next button → all sage (was ink)
