@@ -11,7 +11,7 @@ export default function LegalPage({ kind }) {
   return (
     <div data-testid={`legal-page-${kind}`} className="bg-white min-h-screen">
       <header className="border-b border-fidaro-green-light bg-white sticky top-0 z-30 backdrop-blur">
-        <div className="max-w-4xl mx-auto px-6 md:px-10 h-16 flex items-center justify-between">
+        <div className="max-w-4xl mx-auto px-6 md:px-10 h-24 flex items-center justify-between">
           <Link
             to="/"
             data-testid="legal-back-link"
@@ -21,7 +21,7 @@ export default function LegalPage({ kind }) {
             <img
               src="https://customer-assets.emergentagent.com/job_35e0d8c8-8484-434c-b0cb-1a5cfc9d3012/artifacts/p4sighyv_Untitled%20design%20%2811%29.png"
               alt="Fidaro Vastgoed"
-              className="h-12 w-12 object-contain"
+              className="h-20 w-20 object-contain"
             />
           </Link>
           <div className="flex items-center text-xs border border-fidaro-green/30 rounded-full overflow-hidden">

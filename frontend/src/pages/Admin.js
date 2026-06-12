@@ -103,7 +103,7 @@ export default function Admin() {
           data-testid="admin-login-form"
           className="bg-white rounded-3xl shadow-[0_30px_70px_-25px_rgba(15,20,16,0.18)] border border-fidaro-green-light p-10 max-w-md w-full"
         >
-          <img src={LOGO_URL} alt="Fidaro" className="h-14 w-14 mx-auto object-contain" />
+          <img src={LOGO_URL} alt="Fidaro" className="h-20 w-20 mx-auto object-contain" />
           <h1 className="mt-4 font-display text-3xl text-center text-fidaro-text-dark">Fidaro Admin</h1>
           <p className="mt-2 text-sm text-center text-fidaro-text-muted">Log in om leads en scores te bekijken.</p>
           <input
@@ -131,7 +131,7 @@ export default function Admin() {
     <div data-testid="admin-dashboard" className="min-h-screen bg-fidaro-green-light/30">
       <header className="bg-white border-b border-fidaro-green-light px-6 md:px-10 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <img src={LOGO_URL} alt="Fidaro" className="h-10 w-10 object-contain" />
+          <img src={LOGO_URL} alt="Fidaro" className="h-16 w-16 object-contain" />
           <h1 className="font-display text-xl text-fidaro-text-dark tracking-tight">Admin</h1>
         </div>
         <button
