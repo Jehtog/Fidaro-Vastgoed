@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Request, Header, Depends
+from fastapi import FastAPI, APIRouter, HTTPException, Request, Header, Depends, BackgroundTasks
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -9,6 +9,8 @@ from pydantic import BaseModel, Field, EmailStr
 from typing import Optional, Dict
 import uuid
 from datetime import datetime, timezone
+
+from email_service import notify_new_lead, notify_payment_paid
 
 # Veilige try/except import voor het Emergent pakket zodat Render niet crasht
 try:
@@ -163,9 +165,11 @@ async def root():
 
 
 @api_router.post("/leads", response_model=Lead)
-async def create_lead(payload: LeadCreate):
+async def create_lead(payload: LeadCreate, background: BackgroundTasks):
     lead = Lead(**payload.model_dump())
     await db.leads.insert_one(lead.model_dump())
+    # Fire-and-forget admin notification; never block API response on email.
+    background.add_task(notify_new_lead, lead.model_dump())
     return lead
 
 
@@ -452,6 +456,17 @@ async def stripe_webhook(request: Request):
                 }
             },
         )
+        # Notify admin once payment is confirmed paid
+        if webhook_response.payment_status == "paid":
+            tx = await db.payment_transactions.find_one(
+                {"session_id": webhook_response.session_id},
+                {"_id": 0},
+            )
+            if tx:
+                try:
+                    await notify_payment_paid(tx)
+                except Exception:
+                    logging.exception("Payment notification failed")
 
     return {
         "received": True,
