@@ -9,7 +9,7 @@ services:
       - src: "/*"
         dest: "/index.html"
 
- # ===== BACKEND (Python FastAPI Server) =====
+  # ===== BACKEND (Python FastAPI Server) =====
   - type: web
     name: fidaro-backend
     env: python
