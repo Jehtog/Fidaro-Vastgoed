@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
-import { Lock, Loader2, LogOut, Plus, X, Trash2 } from "lucide-react";
+import { Lock, Loader2, LogOut, Plus, X, Trash2, LayoutDashboard, Users, CreditCard, Calculator, Settings, ArrowRight } from "lucide-react";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const LOGO_URL =
@@ -46,7 +46,8 @@ export default function Admin() {
   const [payments, setPayments] = useState([]);
   const [scores, setScores] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [tab, setTab] = useState("leads");
+  const [tab, setTab] = useState("overview");
+  const [adminMode, setAdminMode] = useState(false);
   const [showScoreForm, setShowScoreForm] = useState(false);
   const [showLeadForm, setShowLeadForm] = useState(false);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
@@ -174,30 +175,47 @@ export default function Admin() {
           <img src={LOGO_URL} alt="Fidaro" className="h-16 w-16 object-contain" />
           <h1 className="font-display text-xl text-fidaro-text-dark tracking-tight">Admin</h1>
         </div>
-        <button
-          data-testid="admin-logout-btn"
-          onClick={logout}
-          className="text-sm text-fidaro-text-muted hover:text-fidaro-green flex items-center gap-2"
-        >
-          <LogOut className="w-4 h-4" /> Uitloggen
-        </button>
+        <div className="flex items-center gap-4">
+          <button
+            data-testid="admin-mode-toggle"
+            onClick={() => setAdminMode((v) => !v)}
+            className={`hidden md:inline-flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-full transition-colors ${
+              adminMode
+                ? "bg-fidaro-green text-white"
+                : "bg-fidaro-green-light/50 text-fidaro-text-muted hover:bg-fidaro-green-light"
+            }`}
+            title={adminMode ? "Beheer-modus actief" : "Beheer-modus inschakelen"}
+          >
+            <Settings className="w-3.5 h-3.5" />
+            {adminMode ? "Beheer aan" : "Beheer"}
+          </button>
+          <button
+            data-testid="admin-logout-btn"
+            onClick={logout}
+            className="text-sm text-fidaro-text-muted hover:text-fidaro-green flex items-center gap-2"
+          >
+            <LogOut className="w-4 h-4" /> Uitloggen
+          </button>
+        </div>
       </header>
 
       <div className="max-w-7xl mx-auto px-6 md:px-10 py-10">
         <div className="flex flex-wrap gap-2 mb-6">
           {[
-            ["leads", `Leads (${leads.length})`],
-            ["payments", `Betalingen (${payments.length})`],
-            ["scores", `WWS-scores (${scores.length})`],
-          ].map(([id, label]) => (
+            ["overview", "Overzicht", LayoutDashboard],
+            ["leads", `Leads (${leads.length})`, Users],
+            ["payments", `Betalingen (${payments.length})`, CreditCard],
+            ["scores", `WWS-scores (${scores.length})`, Calculator],
+          ].map(([id, label, Icon]) => (
             <button
               key={id}
               data-testid={`tab-${id}`}
               onClick={() => setTab(id)}
-              className={`px-5 py-2 rounded-full text-sm font-medium transition-colors ${
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors inline-flex items-center gap-2 ${
                 tab === id ? "bg-fidaro-green text-white" : "bg-white text-fidaro-text-dark hover:bg-fidaro-green-light"
               }`}
             >
+              <Icon className="w-4 h-4" />
               {label}
             </button>
           ))}
@@ -207,6 +225,16 @@ export default function Admin() {
           <div className="flex justify-center py-12">
             <Loader2 className="w-8 h-8 animate-spin text-fidaro-green" />
           </div>
+        )}
+
+        {/* OVERVIEW TAB — landing dashboard */}
+        {!loading && tab === "overview" && (
+          <OverviewTab
+            leads={leads}
+            payments={payments}
+            scores={scores}
+            onNavigate={setTab}
+          />
         )}
 
         {/* LEADS TAB */}
@@ -220,6 +248,7 @@ export default function Admin() {
               <button
                 data-testid="add-lead-btn"
                 onClick={() => setShowLeadForm(true)}
+                hidden={!adminMode}
                 className="inline-flex items-center gap-2 bg-fidaro-green hover:bg-fidaro-green-dark text-white rounded-full px-5 py-2.5 text-sm font-semibold transition-colors shadow-[0_6px_22px_rgba(79,111,87,0.25)]"
               >
                 <Plus className="w-4 h-4" /> Nieuwe lead
@@ -299,6 +328,7 @@ export default function Admin() {
               <button
                 data-testid="add-payment-btn"
                 onClick={() => setShowPaymentForm(true)}
+                hidden={!adminMode}
                 className="inline-flex items-center gap-2 bg-fidaro-green hover:bg-fidaro-green-dark text-white rounded-full px-5 py-2.5 text-sm font-semibold transition-colors shadow-[0_6px_22px_rgba(79,111,87,0.25)]"
               >
                 <Plus className="w-4 h-4" /> Nieuwe betaling
@@ -369,6 +399,7 @@ export default function Admin() {
               <button
                 data-testid="add-score-btn"
                 onClick={() => setShowScoreForm(true)}
+                hidden={!adminMode}
                 className="inline-flex items-center gap-2 bg-fidaro-green hover:bg-fidaro-green-dark text-white rounded-full px-5 py-2.5 text-sm font-semibold transition-colors shadow-[0_6px_22px_rgba(79,111,87,0.25)]"
               >
                 <Plus className="w-4 h-4" /> Nieuwe invoer
@@ -903,5 +934,234 @@ function PaymentEntryModal({ token, onClose, onCreated }) {
         </div>
       </form>
     </div>
+  );
+}
+
+
+function OverviewTab({ leads, payments, scores, onNavigate }) {
+  // Revenue: count only paid payments.
+  const paidPayments = payments.filter((p) => p.payment_status === "paid");
+  const totalRevenue = paidPayments.reduce(
+    (sum, p) => sum + (parseFloat(p.amount) || 0),
+    0
+  );
+
+  // 7-day windows for trend.
+  const now = Date.now();
+  const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+  const within7Days = (iso) => {
+    const t = new Date(iso).getTime();
+    return Number.isFinite(t) && now - t < WEEK_MS;
+  };
+  const leadsThisWeek = leads.filter((l) => within7Days(l.created_at)).length;
+  const scoresThisWeek = scores.filter((s) => within7Days(s.created_at)).length;
+  const revenueThisWeek = paidPayments
+    .filter((p) => within7Days(p.created_at))
+    .reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+
+  const investmentPlanRequests = leads.filter(
+    (l) => l.service === "investment_plan"
+  ).length;
+
+  const avgScore = scores.length
+    ? Math.round(
+        scores.reduce((sum, s) => sum + (parseFloat(s.total) || 0), 0) /
+          scores.length
+      )
+    : null;
+
+  const recentLeads = leads.slice(0, 5);
+  const recentPayments = paidPayments.slice(0, 5);
+
+  return (
+    <div data-testid="overview-tab" className="space-y-8">
+      {/* Hero greeting */}
+      <div className="rounded-3xl bg-gradient-to-br from-fidaro-green-dark via-fidaro-green-dark to-fidaro-green p-8 md:p-10 text-white relative overflow-hidden">
+        <div className="absolute -top-20 -right-16 w-72 h-72 bg-fidaro-green-bright/25 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative">
+          <div className="text-[10px] uppercase tracking-[0.22em] text-fidaro-green-bright font-mono">
+            Welkom terug
+          </div>
+          <h2 className="mt-3 font-display text-3xl md:text-4xl tracking-tight">
+            Fidaro Admin Overzicht
+          </h2>
+          <p className="mt-3 text-white/75 max-w-xl">
+            Hier zie je in één oogopslag hoe je platform draait — aanvragen, betalingen en WWS-validaties.
+          </p>
+        </div>
+      </div>
+
+      {/* KPI cards */}
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <KPICard
+          label="Totaal leads"
+          value={leads.length}
+          delta={`${leadsThisWeek} deze week`}
+          icon={Users}
+        />
+        <KPICard
+          label="Totale omzet (betaald)"
+          value={`€ ${totalRevenue.toLocaleString("nl-NL")}`}
+          delta={
+            revenueThisWeek > 0
+              ? `+ € ${revenueThisWeek.toLocaleString("nl-NL")} deze week`
+              : "Geen omzet deze week"
+          }
+          icon={CreditCard}
+        />
+        <KPICard
+          label="WWS-scores"
+          value={scores.length}
+          delta={
+            avgScore != null
+              ? `Gem. ${avgScore} pt · ${scoresThisWeek} deze week`
+              : "Nog geen scores"
+          }
+          icon={Calculator}
+        />
+        <KPICard
+          label="€750 aanvragen"
+          value={investmentPlanRequests}
+          delta="Investment Plan"
+          icon={LayoutDashboard}
+        />
+      </div>
+
+      {/* Navigation cards + recent activity */}
+      <div className="grid lg:grid-cols-3 gap-5">
+        <div className="lg:col-span-2 grid sm:grid-cols-2 gap-4">
+          <NavTile
+            icon={Users}
+            title="Leads"
+            count={leads.length}
+            desc="Alle ingekomen aanvragen via contact, Quick-Scan en Investment Plan."
+            onClick={() => onNavigate("leads")}
+            testid="goto-leads"
+          />
+          <NavTile
+            icon={CreditCard}
+            title="Betalingen"
+            count={payments.length}
+            desc="Stripe-betalingen + handmatig geboekte transacties."
+            onClick={() => onNavigate("payments")}
+            testid="goto-payments"
+          />
+          <NavTile
+            icon={Calculator}
+            title="WWS-scores"
+            count={scores.length}
+            desc="Berekende scores via de calculator en handmatig opgenomen klantscores."
+            onClick={() => onNavigate("scores")}
+            testid="goto-scores"
+          />
+          <NavTile
+            icon={LayoutDashboard}
+            title="Website"
+            count={null}
+            desc="Bekijk de live website in een nieuw tabblad."
+            onClick={() => window.open("/", "_blank")}
+            testid="goto-website"
+          />
+        </div>
+
+        {/* Recent activity feed */}
+        <div className="bg-white rounded-3xl border border-fidaro-green-light p-6">
+          <div className="text-[10px] uppercase tracking-[0.22em] text-fidaro-text-muted font-mono">
+            Recente activiteit
+          </div>
+          <ul className="mt-4 space-y-3">
+            {recentLeads.length === 0 && recentPayments.length === 0 && (
+              <li className="text-sm text-fidaro-text-muted">Nog geen activiteit.</li>
+            )}
+            {recentPayments.slice(0, 3).map((p) => (
+              <li key={`p-${p.id}`} className="flex items-start gap-3 text-sm">
+                <span className="mt-1 w-2 h-2 rounded-full bg-fidaro-green flex-shrink-0" />
+                <div>
+                  <div className="text-fidaro-ink font-medium">
+                    € {p.amount} {String(p.currency || "").toUpperCase()} betaald
+                  </div>
+                  <div className="text-xs text-fidaro-text-muted">
+                    {p.metadata?.lead_email || "—"} · {new Date(p.created_at).toLocaleString("nl-NL", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                  </div>
+                </div>
+              </li>
+            ))}
+            {recentLeads.slice(0, 4).map((l) => (
+              <li key={`l-${l.id}`} className="flex items-start gap-3 text-sm">
+                <span className="mt-1 w-2 h-2 rounded-full bg-fidaro-green-bright flex-shrink-0" />
+                <div>
+                  <div className="text-fidaro-ink font-medium">
+                    {l.name}
+                    {l.service === "investment_plan" && (
+                      <span className="ml-2 text-[10px] uppercase tracking-widest text-fidaro-green-dark font-semibold">
+                        €750
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-xs text-fidaro-text-muted">
+                    {l.email} · {new Date(l.created_at).toLocaleString("nl-NL", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+function KPICard({ label, value, delta, icon: Icon }) {
+  return (
+    <div className="bg-white rounded-2xl border border-fidaro-green-light p-5">
+      <div className="flex items-start justify-between">
+        <div className="text-[10px] uppercase tracking-widest text-fidaro-text-muted font-mono">
+          {label}
+        </div>
+        {Icon && (
+          <div className="w-8 h-8 rounded-lg bg-fidaro-green-light/60 flex items-center justify-center text-fidaro-green-dark">
+            <Icon className="w-4 h-4" />
+          </div>
+        )}
+      </div>
+      <div className="mt-3 font-display text-3xl tabular text-fidaro-ink leading-none">
+        {value}
+      </div>
+      {delta && (
+        <div className="mt-2 text-xs text-fidaro-text-muted">{delta}</div>
+      )}
+    </div>
+  );
+}
+
+
+function NavTile({ icon: Icon, title, count, desc, onClick, testid }) {
+  return (
+    <button
+      onClick={onClick}
+      data-testid={testid}
+      className="group text-left bg-white rounded-3xl border border-fidaro-green-light p-6 hover:border-fidaro-green hover:shadow-[0_18px_45px_-22px_rgba(63,92,73,0.25)] hover:-translate-y-0.5 transition-all"
+    >
+      <div className="flex items-start justify-between">
+        <div className="w-11 h-11 rounded-xl bg-fidaro-green-light/60 flex items-center justify-center text-fidaro-green-dark">
+          <Icon className="w-5 h-5" />
+        </div>
+        {count != null && (
+          <span className="text-fidaro-green-dark font-display text-xl tabular">
+            {count}
+          </span>
+        )}
+      </div>
+      <div className="mt-5 font-display text-xl text-fidaro-ink tracking-tight">
+        {title}
+      </div>
+      <p className="mt-1.5 text-sm text-fidaro-text-muted leading-relaxed">
+        {desc}
+      </p>
+      <div className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-fidaro-green-dark group-hover:gap-2 transition-all">
+        Openen <ArrowRight className="w-3.5 h-3.5" />
+      </div>
+    </button>
   );
 }
