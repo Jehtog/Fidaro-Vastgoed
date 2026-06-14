@@ -210,6 +210,61 @@ async def admin_get_payments(_: bool = Depends(verify_admin)):
     return txs
 
 
+# Admin-only: manually log a payment (for offline transfers, invoices, etc.)
+class AdminPaymentCreate(BaseModel):
+    amount: float
+    currency: Optional[str] = "EUR"
+    package_id: Optional[str] = "quickscan"
+    payment_status: Optional[str] = "paid"
+    lead_name: Optional[str] = ""
+    lead_email: Optional[str] = ""
+    lead_phone: Optional[str] = ""
+    lead_property_address: Optional[str] = ""
+    note: Optional[str] = ""
+    created_at: Optional[str] = None
+
+
+@api_router.post("/admin/payments")
+async def admin_create_payment(payload: AdminPaymentCreate, _: bool = Depends(verify_admin)):
+    doc = {
+        "id": str(uuid.uuid4()),
+        "session_id": f"manual_{uuid.uuid4().hex[:12]}",
+        "amount": payload.amount,
+        "currency": (payload.currency or "EUR").lower(),
+        "package_id": payload.package_id or "quickscan",
+        "payment_status": payload.payment_status or "paid",
+        "metadata": {
+            "lead_name": payload.lead_name or "",
+            "lead_email": payload.lead_email or "",
+            "lead_phone": payload.lead_phone or "",
+            "lead_property_address": payload.lead_property_address or "",
+            "note": payload.note or "",
+            "manual_entry": True,
+        },
+        "created_at": payload.created_at or datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.payment_transactions.insert_one(doc)
+    doc.pop("_id", None)
+    return doc
+
+
+@api_router.delete("/admin/leads/{lead_id}")
+async def admin_delete_lead(lead_id: str, _: bool = Depends(verify_admin)):
+    res = await db.leads.delete_one({"id": lead_id})
+    if res.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Not found")
+    return {"ok": True}
+
+
+@api_router.delete("/admin/payments/{payment_id}")
+async def admin_delete_payment(payment_id: str, _: bool = Depends(verify_admin)):
+    res = await db.payment_transactions.delete_one({"id": payment_id})
+    if res.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Not found")
+    return {"ok": True}
+
+
 # ===== WWS Scores =====
 @api_router.post("/wws-scores", response_model=WWSScore)
 async def create_wws_score(payload: WWSScoreCreate):

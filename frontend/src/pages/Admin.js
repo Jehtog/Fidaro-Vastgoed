@@ -27,6 +27,18 @@ const toLocalInput = (d) => {
   );
 };
 
+// FastAPI 422 returns detail as an array of {type, loc, msg, input, ctx}.
+// React cannot render objects directly, so we always coerce to a string here.
+const formatApiError = (err) => {
+  const detail = err?.response?.data?.detail;
+  if (!detail) return "Opslaan mislukt";
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail)) {
+    return detail.map((d) => d?.msg || d?.type || "Validatiefout").join(" · ");
+  }
+  return "Opslaan mislukt";
+};
+
 export default function Admin() {
   const [token, setToken] = useState(() => localStorage.getItem("fidaro_admin_token") || "");
   const [password, setPassword] = useState("");
@@ -36,6 +48,8 @@ export default function Admin() {
   const [loading, setLoading] = useState(false);
   const [tab, setTab] = useState("leads");
   const [showScoreForm, setShowScoreForm] = useState(false);
+  const [showLeadForm, setShowLeadForm] = useState(false);
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
 
   const load = async (tok) => {
     setLoading(true);
@@ -90,6 +104,32 @@ export default function Admin() {
       });
       setScores(scores.filter((s) => s.id !== id));
       toast.success("Verwijderd");
+    } catch {
+      toast.error("Verwijderen mislukt");
+    }
+  };
+
+  const deleteLead = async (id) => {
+    if (!window.confirm("Deze lead verwijderen?")) return;
+    try {
+      await axios.delete(`${API}/admin/leads/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setLeads(leads.filter((l) => l.id !== id));
+      toast.success("Lead verwijderd");
+    } catch {
+      toast.error("Verwijderen mislukt");
+    }
+  };
+
+  const deletePayment = async (id) => {
+    if (!window.confirm("Deze betaling verwijderen?")) return;
+    try {
+      await axios.delete(`${API}/admin/payments/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setPayments(payments.filter((p) => p.id !== id));
+      toast.success("Betaling verwijderd");
     } catch {
       toast.error("Verwijderen mislukt");
     }
@@ -171,24 +211,39 @@ export default function Admin() {
 
         {/* LEADS TAB */}
         {!loading && tab === "leads" && (
-          <div data-testid="leads-table" className="bg-white rounded-2xl border border-fidaro-green-light overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-fidaro-green-light/50 text-left">
-                  <tr>
-                    <th className="px-4 py-3">Datum</th>
-                    <th className="px-4 py-3">Naam</th>
-                    <th className="px-4 py-3">E-mail</th>
-                    <th className="px-4 py-3">Telefoon</th>
-                    <th className="px-4 py-3">Adres</th>
-                    <th className="px-4 py-3">Dienst</th>
-                    <th className="px-4 py-3">Akkoord €</th>
-                  </tr>
-                </thead>
+          <div data-testid="leads-tab">
+            <div className="flex items-end justify-between gap-4 mb-5">
+              <div className="rounded-xl bg-white border border-fidaro-green-light px-5 py-3">
+                <div className="text-[10px] uppercase tracking-widest text-fidaro-text-muted">Totaal leads</div>
+                <div className="mt-0.5 text-2xl font-bold tabular text-fidaro-ink">{leads.length}</div>
+              </div>
+              <button
+                data-testid="add-lead-btn"
+                onClick={() => setShowLeadForm(true)}
+                className="inline-flex items-center gap-2 bg-fidaro-green hover:bg-fidaro-green-dark text-white rounded-full px-5 py-2.5 text-sm font-semibold transition-colors shadow-[0_6px_22px_rgba(79,111,87,0.25)]"
+              >
+                <Plus className="w-4 h-4" /> Nieuwe lead
+              </button>
+            </div>
+            <div className="bg-white rounded-2xl border border-fidaro-green-light overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-fidaro-green-light/50 text-left">
+                    <tr>
+                      <th className="px-4 py-3">Datum</th>
+                      <th className="px-4 py-3">Naam</th>
+                      <th className="px-4 py-3">E-mail</th>
+                      <th className="px-4 py-3">Telefoon</th>
+                      <th className="px-4 py-3">Adres</th>
+                      <th className="px-4 py-3">Dienst</th>
+                      <th className="px-4 py-3">Akkoord €</th>
+                      <th className="px-4 py-3"></th>
+                    </tr>
+                  </thead>
                 <tbody>
                   {leads.map((l, i) => (
-                    <tr key={l.id || i} className="border-t border-fidaro-green-light/60">
-                      <td className="px-4 py-3 text-fidaro-text-muted">{new Date(l.created_at).toLocaleString()}</td>
+                    <tr key={l.id || i} data-testid={`lead-row-${i}`} className="border-t border-fidaro-green-light/60">
+                      <td className="px-4 py-3 text-fidaro-text-muted whitespace-nowrap">{new Date(l.created_at).toLocaleString()}</td>
                       <td className="px-4 py-3 font-medium">{l.name}</td>
                       <td className="px-4 py-3">{l.email}</td>
                       <td className="px-4 py-3">{l.phone}</td>
@@ -209,38 +264,64 @@ export default function Admin() {
                           <span className="text-fidaro-text-muted/40">—</span>
                         )}
                       </td>
+                      <td className="px-4 py-3 text-right">
+                        <button
+                          data-testid={`delete-lead-${i}`}
+                          onClick={() => deleteLead(l.id)}
+                          className="text-fidaro-text-muted/60 hover:text-red-600 transition-colors"
+                          title="Verwijderen"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </td>
                     </tr>
                   ))}
                   {leads.length === 0 && (
                     <tr>
-                      <td colSpan="7" className="px-4 py-8 text-center text-fidaro-text-muted">Nog geen leads.</td>
+                      <td colSpan="8" className="px-4 py-8 text-center text-fidaro-text-muted">Nog geen leads.</td>
                     </tr>
                   )}
                 </tbody>
               </table>
+              </div>
             </div>
           </div>
         )}
 
         {/* PAYMENTS TAB */}
         {!loading && tab === "payments" && (
-          <div data-testid="payments-table" className="bg-white rounded-2xl border border-fidaro-green-light overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-fidaro-green-light/50 text-left">
-                  <tr>
-                    <th className="px-4 py-3">Datum</th>
-                    <th className="px-4 py-3">Bedrag</th>
-                    <th className="px-4 py-3">Package</th>
-                    <th className="px-4 py-3">Status</th>
-                    <th className="px-4 py-3">E-mail</th>
-                    <th className="px-4 py-3">Session</th>
-                  </tr>
-                </thead>
+          <div data-testid="payments-tab">
+            <div className="flex items-end justify-between gap-4 mb-5">
+              <div className="rounded-xl bg-white border border-fidaro-green-light px-5 py-3">
+                <div className="text-[10px] uppercase tracking-widest text-fidaro-text-muted">Totaal betalingen</div>
+                <div className="mt-0.5 text-2xl font-bold tabular text-fidaro-ink">{payments.length}</div>
+              </div>
+              <button
+                data-testid="add-payment-btn"
+                onClick={() => setShowPaymentForm(true)}
+                className="inline-flex items-center gap-2 bg-fidaro-green hover:bg-fidaro-green-dark text-white rounded-full px-5 py-2.5 text-sm font-semibold transition-colors shadow-[0_6px_22px_rgba(79,111,87,0.25)]"
+              >
+                <Plus className="w-4 h-4" /> Nieuwe betaling
+              </button>
+            </div>
+            <div className="bg-white rounded-2xl border border-fidaro-green-light overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-fidaro-green-light/50 text-left">
+                    <tr>
+                      <th className="px-4 py-3">Datum</th>
+                      <th className="px-4 py-3">Bedrag</th>
+                      <th className="px-4 py-3">Package</th>
+                      <th className="px-4 py-3">Status</th>
+                      <th className="px-4 py-3">Naam</th>
+                      <th className="px-4 py-3">E-mail</th>
+                      <th className="px-4 py-3"></th>
+                    </tr>
+                  </thead>
                 <tbody>
                   {payments.map((p, i) => (
-                    <tr key={p.id || i} className="border-t border-fidaro-green-light/60">
-                      <td className="px-4 py-3 text-fidaro-text-muted">{new Date(p.created_at).toLocaleString()}</td>
+                    <tr key={p.id || i} data-testid={`payment-row-${i}`} className="border-t border-fidaro-green-light/60">
+                      <td className="px-4 py-3 text-fidaro-text-muted whitespace-nowrap">{new Date(p.created_at).toLocaleString()}</td>
                       <td className="px-4 py-3 font-medium">€{p.amount} {p.currency?.toUpperCase()}</td>
                       <td className="px-4 py-3">{p.package_id}</td>
                       <td className="px-4 py-3">
@@ -250,17 +331,28 @@ export default function Admin() {
                           {p.payment_status}
                         </span>
                       </td>
-                      <td className="px-4 py-3">{p.metadata?.lead_email}</td>
-                      <td className="px-4 py-3 text-xs text-fidaro-text-muted truncate max-w-[180px]">{p.session_id}</td>
+                      <td className="px-4 py-3">{p.metadata?.lead_name || <span className="text-fidaro-text-muted/40">—</span>}</td>
+                      <td className="px-4 py-3">{p.metadata?.lead_email || <span className="text-fidaro-text-muted/40">—</span>}</td>
+                      <td className="px-4 py-3 text-right">
+                        <button
+                          data-testid={`delete-payment-${i}`}
+                          onClick={() => deletePayment(p.id)}
+                          className="text-fidaro-text-muted/60 hover:text-red-600 transition-colors"
+                          title="Verwijderen"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </td>
                     </tr>
                   ))}
                   {payments.length === 0 && (
                     <tr>
-                      <td colSpan="6" className="px-4 py-8 text-center text-fidaro-text-muted">Nog geen betalingen.</td>
+                      <td colSpan="7" className="px-4 py-8 text-center text-fidaro-text-muted">Nog geen betalingen.</td>
                     </tr>
                   )}
                 </tbody>
               </table>
+            </div>
             </div>
           </div>
         )}
@@ -362,6 +454,30 @@ export default function Admin() {
           }}
         />
       )}
+
+      {showLeadForm && (
+        <LeadEntryModal
+          token={token}
+          onClose={() => setShowLeadForm(false)}
+          onCreated={(l) => {
+            setLeads([l, ...leads]);
+            setShowLeadForm(false);
+            toast.success("Lead toegevoegd");
+          }}
+        />
+      )}
+
+      {showPaymentForm && (
+        <PaymentEntryModal
+          token={token}
+          onClose={() => setShowPaymentForm(false)}
+          onCreated={(p) => {
+            setPayments([p, ...payments]);
+            setShowPaymentForm(false);
+            toast.success("Betaling toegevoegd");
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -408,7 +524,7 @@ function ScoreEntryModal({ token, onClose, onCreated }) {
       );
       onCreated(res.data);
     } catch (err) {
-      toast.error(err?.response?.data?.detail || "Opslaan mislukt");
+      toast.error(formatApiError(err));
     } finally {
       setSaving(false);
     }
@@ -544,6 +660,243 @@ function ScoreEntryModal({ token, onClose, onCreated }) {
             disabled={saving}
             className="flex-[2] bg-fidaro-green hover:bg-fidaro-green-dark disabled:opacity-60 text-white rounded-full px-4 py-3 font-semibold transition-colors flex items-center justify-center gap-2 shadow-[0_6px_22px_rgba(79,111,87,0.3)]"
           >
+            {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+            Opslaan
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+
+function LeadEntryModal({ token, onClose, onCreated }) {
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    property_address: "",
+    service: "quickscan",
+    message: "",
+    agreed_to_price: false,
+    created_at: toLocalInput(new Date()),
+  });
+  const [saving, setSaving] = useState(false);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!form.name || !form.email) {
+      toast.error("Naam en e-mail zijn verplicht");
+      return;
+    }
+    setSaving(true);
+    try {
+      const iso = new Date(form.created_at).toISOString();
+      const res = await axios.post(
+        `${API}/admin/leads`,
+        {
+          ...form,
+          source: "admin_manual",
+          language: "nl",
+          created_at: iso,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      onCreated(res.data);
+    } catch (err) {
+      toast.error(formatApiError(err));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const inputCls =
+    "w-full bg-white border border-fidaro-green-light rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-fidaro-green focus:ring-2 focus:ring-fidaro-green/20 transition-colors";
+  const lblCls = "text-[10px] font-mono uppercase tracking-[0.18em] text-fidaro-text-muted";
+
+  return (
+    <div
+      data-testid="lead-entry-modal"
+      className="fixed inset-0 z-50 bg-fidaro-green-dark/45 backdrop-blur flex items-center justify-center p-4 overflow-y-auto"
+    >
+      <form onSubmit={submit} className="bg-white rounded-3xl max-w-xl w-full p-8 shadow-2xl my-8">
+        <div className="flex items-start justify-between">
+          <div>
+            <div className="text-[10px] uppercase tracking-widest text-fidaro-green font-mono">
+              Handmatige lead
+            </div>
+            <h3 className="mt-1 font-display text-2xl text-fidaro-ink">Nieuwe lead</h3>
+          </div>
+          <button type="button" data-testid="lead-entry-close" onClick={onClose} className="text-fidaro-text-muted hover:text-fidaro-ink p-1">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="mt-6 grid sm:grid-cols-2 gap-3">
+          <label className="block">
+            <span className={lblCls}>Naam *</span>
+            <input data-testid="lead-name" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className={`${inputCls} mt-1.5`} />
+          </label>
+          <label className="block">
+            <span className={lblCls}>E-mail *</span>
+            <input data-testid="lead-email" type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className={`${inputCls} mt-1.5`} />
+          </label>
+          <label className="block">
+            <span className={lblCls}>Telefoon</span>
+            <input data-testid="lead-phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className={`${inputCls} mt-1.5`} />
+          </label>
+          <label className="block">
+            <span className={lblCls}>Adres</span>
+            <input data-testid="lead-address" value={form.property_address} onChange={(e) => setForm({ ...form, property_address: e.target.value })} className={`${inputCls} mt-1.5`} />
+          </label>
+          <label className="block">
+            <span className={lblCls}>Dienst</span>
+            <select data-testid="lead-service" value={form.service} onChange={(e) => setForm({ ...form, service: e.target.value })} className={`${inputCls} mt-1.5`}>
+              <option value="quickscan">Quick-Scan (€99)</option>
+              <option value="investment_plan">Investment Plan (€750)</option>
+              <option value="consult">Consult</option>
+            </select>
+          </label>
+          <label className="block">
+            <span className={lblCls}>Datum &amp; tijd *</span>
+            <input data-testid="lead-datetime" type="datetime-local" required value={form.created_at} onChange={(e) => setForm({ ...form, created_at: e.target.value })} className={`${inputCls} mt-1.5`} />
+          </label>
+          <label className="block sm:col-span-2">
+            <span className={lblCls}>Bericht / notitie</span>
+            <textarea data-testid="lead-message" value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} rows={2} className={`${inputCls} mt-1.5 resize-none`} />
+          </label>
+          {form.service === "investment_plan" && (
+            <label className="sm:col-span-2 flex items-center gap-3 p-3 rounded-xl border border-fidaro-green-light bg-fidaro-green-light/30">
+              <input type="checkbox" data-testid="lead-agree" checked={form.agreed_to_price} onChange={(e) => setForm({ ...form, agreed_to_price: e.target.checked })} className="w-5 h-5 accent-fidaro-green" />
+              <span className="text-sm text-fidaro-ink">Klant heeft akkoord gegeven voor € 750 tarief</span>
+            </label>
+          )}
+        </div>
+
+        <div className="mt-7 flex gap-3">
+          <button type="button" data-testid="lead-cancel-btn" onClick={onClose} className="flex-1 border border-fidaro-green-light text-fidaro-text-muted rounded-full px-4 py-3 hover:bg-fidaro-green-light/40 transition-colors">Annuleren</button>
+          <button type="submit" data-testid="lead-save-btn" disabled={saving} className="flex-[2] bg-fidaro-green hover:bg-fidaro-green-dark disabled:opacity-60 text-white rounded-full px-4 py-3 font-semibold transition-colors flex items-center justify-center gap-2 shadow-[0_6px_22px_rgba(79,111,87,0.3)]">
+            {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+            Opslaan
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+
+function PaymentEntryModal({ token, onClose, onCreated }) {
+  const [form, setForm] = useState({
+    amount: "99",
+    currency: "EUR",
+    package_id: "quickscan",
+    payment_status: "paid",
+    lead_name: "",
+    lead_email: "",
+    lead_phone: "",
+    lead_property_address: "",
+    note: "",
+    created_at: toLocalInput(new Date()),
+  });
+  const [saving, setSaving] = useState(false);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    const amt = parseFloat(form.amount);
+    if (Number.isNaN(amt) || amt <= 0) {
+      toast.error("Voer een geldig bedrag in");
+      return;
+    }
+    setSaving(true);
+    try {
+      const iso = new Date(form.created_at).toISOString();
+      const res = await axios.post(
+        `${API}/admin/payments`,
+        { ...form, amount: amt, created_at: iso },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      onCreated(res.data);
+    } catch (err) {
+      toast.error(err?.response?.data?.detail || "Opslaan mislukt");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const inputCls = "w-full bg-white border border-fidaro-green-light rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-fidaro-green focus:ring-2 focus:ring-fidaro-green/20 transition-colors";
+  const lblCls = "text-[10px] font-mono uppercase tracking-[0.18em] text-fidaro-text-muted";
+
+  return (
+    <div
+      data-testid="payment-entry-modal"
+      className="fixed inset-0 z-50 bg-fidaro-green-dark/45 backdrop-blur flex items-center justify-center p-4 overflow-y-auto"
+    >
+      <form onSubmit={submit} className="bg-white rounded-3xl max-w-xl w-full p-8 shadow-2xl my-8">
+        <div className="flex items-start justify-between">
+          <div>
+            <div className="text-[10px] uppercase tracking-widest text-fidaro-green font-mono">
+              Handmatige betaling
+            </div>
+            <h3 className="mt-1 font-display text-2xl text-fidaro-ink">Nieuwe betaling</h3>
+            <p className="mt-1 text-xs text-fidaro-text-muted">Voor handmatige overschrijvingen of facturen buiten Stripe om.</p>
+          </div>
+          <button type="button" data-testid="payment-entry-close" onClick={onClose} className="text-fidaro-text-muted hover:text-fidaro-ink p-1">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="mt-6 grid sm:grid-cols-2 gap-3">
+          <label className="block">
+            <span className={lblCls}>Bedrag (€) *</span>
+            <input data-testid="payment-amount" type="number" step="0.01" required value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} className={`${inputCls} mt-1.5`} />
+          </label>
+          <label className="block">
+            <span className={lblCls}>Package</span>
+            <select data-testid="payment-package" value={form.package_id} onChange={(e) => setForm({ ...form, package_id: e.target.value })} className={`${inputCls} mt-1.5`}>
+              <option value="quickscan">Quick-Scan</option>
+              <option value="investment_plan">Investment Plan</option>
+              <option value="consult">Consult</option>
+              <option value="other">Anders</option>
+            </select>
+          </label>
+          <label className="block">
+            <span className={lblCls}>Status</span>
+            <select data-testid="payment-status" value={form.payment_status} onChange={(e) => setForm({ ...form, payment_status: e.target.value })} className={`${inputCls} mt-1.5`}>
+              <option value="paid">Betaald</option>
+              <option value="pending">In afwachting</option>
+              <option value="refunded">Terugbetaald</option>
+            </select>
+          </label>
+          <label className="block">
+            <span className={lblCls}>Datum &amp; tijd *</span>
+            <input data-testid="payment-datetime" type="datetime-local" required value={form.created_at} onChange={(e) => setForm({ ...form, created_at: e.target.value })} className={`${inputCls} mt-1.5`} />
+          </label>
+          <label className="block">
+            <span className={lblCls}>Naam klant</span>
+            <input data-testid="payment-lead-name" value={form.lead_name} onChange={(e) => setForm({ ...form, lead_name: e.target.value })} className={`${inputCls} mt-1.5`} />
+          </label>
+          <label className="block">
+            <span className={lblCls}>E-mail klant</span>
+            <input data-testid="payment-lead-email" type="email" value={form.lead_email} onChange={(e) => setForm({ ...form, lead_email: e.target.value })} className={`${inputCls} mt-1.5`} />
+          </label>
+          <label className="block">
+            <span className={lblCls}>Telefoon</span>
+            <input data-testid="payment-lead-phone" value={form.lead_phone} onChange={(e) => setForm({ ...form, lead_phone: e.target.value })} className={`${inputCls} mt-1.5`} />
+          </label>
+          <label className="block">
+            <span className={lblCls}>Adres pand</span>
+            <input data-testid="payment-lead-address" value={form.lead_property_address} onChange={(e) => setForm({ ...form, lead_property_address: e.target.value })} className={`${inputCls} mt-1.5`} />
+          </label>
+          <label className="block sm:col-span-2">
+            <span className={lblCls}>Notitie</span>
+            <textarea data-testid="payment-note" value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} rows={2} className={`${inputCls} mt-1.5 resize-none`} />
+          </label>
+        </div>
+
+        <div className="mt-7 flex gap-3">
+          <button type="button" data-testid="payment-cancel-btn" onClick={onClose} className="flex-1 border border-fidaro-green-light text-fidaro-text-muted rounded-full px-4 py-3 hover:bg-fidaro-green-light/40 transition-colors">Annuleren</button>
+          <button type="submit" data-testid="payment-save-btn" disabled={saving} className="flex-[2] bg-fidaro-green hover:bg-fidaro-green-dark disabled:opacity-60 text-white rounded-full px-4 py-3 font-semibold transition-colors flex items-center justify-center gap-2 shadow-[0_6px_22px_rgba(79,111,87,0.3)]">
             {saving && <Loader2 className="w-4 h-4 animate-spin" />}
             Opslaan
           </button>
