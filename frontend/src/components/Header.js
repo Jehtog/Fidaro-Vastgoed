@@ -35,9 +35,9 @@ export default function Header() {
           : "bg-white/70 backdrop-blur"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-6 md:px-10 h-44 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-6 md:px-10 h-24 flex items-center justify-between">
         <Link to="/" data-testid="header-logo" className="flex items-center gap-3 text-fidaro-ink">
-          <img src={LOGO_URL} alt="Fidaro Vastgoed" className="h-40 w-40 object-contain" />
+          <img src={LOGO_URL} alt="Fidaro Vastgoed" className="h-32 w-32 object-contain -my-4" />
         </Link>
 
         <nav className="hidden lg:flex items-center gap-7">
