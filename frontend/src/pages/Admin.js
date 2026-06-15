@@ -48,6 +48,14 @@ export default function Admin() {
   const [loading, setLoading] = useState(false);
   const [tab, setTab] = useState("overview");
   const [adminMode, setAdminMode] = useState(false);
+
+  // PII masking helper
+  const maskPII = (val) => {
+    if (!val) return '—';
+    const s = String(val);
+    if (s.length <= 2) return '••';
+    return s[0] + '•'.repeat(Math.min(s.length - 2, 8)) + s[s.length - 1];
+  };
   const [showScoreForm, setShowScoreForm] = useState(false);
   const [showLeadForm, setShowLeadForm] = useState(false);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
@@ -245,14 +253,15 @@ export default function Admin() {
                 <div className="text-[10px] uppercase tracking-widest text-fidaro-text-muted">Totaal leads</div>
                 <div className="mt-0.5 text-2xl font-bold tabular text-fidaro-ink">{leads.length}</div>
               </div>
-              <button
-                data-testid="add-lead-btn"
-                onClick={() => setShowLeadForm(true)}
-                hidden={!adminMode}
-                className="inline-flex items-center gap-2 bg-fidaro-green hover:bg-fidaro-green-dark text-white rounded-full px-5 py-2.5 text-sm font-semibold transition-colors shadow-[0_6px_22px_rgba(79,111,87,0.25)]"
-              >
-                <Plus className="w-4 h-4" /> Nieuwe lead
-              </button>
+              {adminMode && (
+                <button
+                  data-testid="add-lead-btn"
+                  onClick={() => setShowLeadForm(true)}
+                  className="inline-flex items-center gap-2 bg-fidaro-green hover:bg-fidaro-green-dark text-white rounded-full px-5 py-2.5 text-sm font-semibold transition-colors shadow-[0_6px_22px_rgba(79,111,87,0.25)]"
+                >
+                  <Plus className="w-4 h-4" /> Nieuwe lead
+                </button>
+              )}
             </div>
             <div className="bg-white rounded-2xl border border-fidaro-green-light overflow-hidden">
               <div className="overflow-x-auto">
@@ -273,10 +282,10 @@ export default function Admin() {
                   {leads.map((l, i) => (
                     <tr key={l.id || i} data-testid={`lead-row-${i}`} className="border-t border-fidaro-green-light/60">
                       <td className="px-4 py-3 text-fidaro-text-muted whitespace-nowrap">{new Date(l.created_at).toLocaleString()}</td>
-                      <td className="px-4 py-3 font-medium">{l.name}</td>
-                      <td className="px-4 py-3">{l.email}</td>
-                      <td className="px-4 py-3">{l.phone}</td>
-                      <td className="px-4 py-3">{l.property_address}</td>
+                      <td className="px-4 py-3 font-medium">{adminMode ? l.name : <span className="blur-sm select-none text-fidaro-text-muted">{maskPII(l.name)}</span>}</td>
+                      <td className="px-4 py-3">{adminMode ? l.email : <span className="blur-sm select-none text-fidaro-text-muted">{maskPII(l.email)}</span>}</td>
+                      <td className="px-4 py-3">{adminMode ? l.phone : <span className="blur-sm select-none text-fidaro-text-muted">{maskPII(l.phone)}</span>}</td>
+                      <td className="px-4 py-3">{adminMode ? l.property_address : <span className="blur-sm select-none text-fidaro-text-muted">{maskPII(l.property_address)}</span>}</td>
                       <td className="px-4 py-3">
                         {l.service === "investment_plan" ? (
                           <span className="inline-block px-2 py-1 rounded text-xs bg-fidaro-green text-white">
@@ -325,14 +334,15 @@ export default function Admin() {
                 <div className="text-[10px] uppercase tracking-widest text-fidaro-text-muted">Totaal betalingen</div>
                 <div className="mt-0.5 text-2xl font-bold tabular text-fidaro-ink">{payments.length}</div>
               </div>
-              <button
-                data-testid="add-payment-btn"
-                onClick={() => setShowPaymentForm(true)}
-                hidden={!adminMode}
-                className="inline-flex items-center gap-2 bg-fidaro-green hover:bg-fidaro-green-dark text-white rounded-full px-5 py-2.5 text-sm font-semibold transition-colors shadow-[0_6px_22px_rgba(79,111,87,0.25)]"
-              >
-                <Plus className="w-4 h-4" /> Nieuwe betaling
-              </button>
+              {adminMode && (
+                <button
+                  data-testid="add-payment-btn"
+                  onClick={() => setShowPaymentForm(true)}
+                  className="inline-flex items-center gap-2 bg-fidaro-green hover:bg-fidaro-green-dark text-white rounded-full px-5 py-2.5 text-sm font-semibold transition-colors shadow-[0_6px_22px_rgba(79,111,87,0.25)]"
+                >
+                  <Plus className="w-4 h-4" /> Nieuwe betaling
+                </button>
+              )}
             </div>
             <div className="bg-white rounded-2xl border border-fidaro-green-light overflow-hidden">
               <div className="overflow-x-auto">
@@ -361,8 +371,8 @@ export default function Admin() {
                           {p.payment_status}
                         </span>
                       </td>
-                      <td className="px-4 py-3">{p.metadata?.lead_name || <span className="text-fidaro-text-muted/40">—</span>}</td>
-                      <td className="px-4 py-3">{p.metadata?.lead_email || <span className="text-fidaro-text-muted/40">—</span>}</td>
+                      <td className="px-4 py-3">{adminMode ? (p.metadata?.lead_name || <span className="text-fidaro-text-muted/40">—</span>) : <span className="blur-sm select-none text-fidaro-text-muted">{maskPII(p.metadata?.lead_name)}</span>}</td>
+                      <td className="px-4 py-3">{adminMode ? (p.metadata?.lead_email || <span className="text-fidaro-text-muted/40">—</span>) : <span className="blur-sm select-none text-fidaro-text-muted">{maskPII(p.metadata?.lead_email)}</span>}</td>
                       <td className="px-4 py-3 text-right">
                         <button
                           data-testid={`delete-payment-${i}`}
@@ -396,14 +406,15 @@ export default function Admin() {
                 <div className="text-[10px] uppercase tracking-widest text-fidaro-text-muted">Totaal WWS-scores</div>
                 <div className="mt-0.5 text-2xl font-bold tabular text-fidaro-ink">{scores.length}</div>
               </div>
-              <button
-                data-testid="add-score-btn"
-                onClick={() => setShowScoreForm(true)}
-                hidden={!adminMode}
-                className="inline-flex items-center gap-2 bg-fidaro-green hover:bg-fidaro-green-dark text-white rounded-full px-5 py-2.5 text-sm font-semibold transition-colors shadow-[0_6px_22px_rgba(79,111,87,0.25)]"
-              >
-                <Plus className="w-4 h-4" /> Nieuwe invoer
-              </button>
+              {adminMode && (
+                <button
+                  data-testid="add-score-btn"
+                  onClick={() => setShowScoreForm(true)}
+                  className="inline-flex items-center gap-2 bg-fidaro-green hover:bg-fidaro-green-dark text-white rounded-full px-5 py-2.5 text-sm font-semibold transition-colors shadow-[0_6px_22px_rgba(79,111,87,0.25)]"
+                >
+                  <Plus className="w-4 h-4" /> Nieuwe invoer
+                </button>
+              )}
             </div>
 
             <div className="bg-white rounded-2xl border border-fidaro-green-light overflow-hidden">
@@ -430,10 +441,10 @@ export default function Admin() {
                             hour: "2-digit", minute: "2-digit",
                           })}
                         </td>
-                        <td className="px-4 py-3 font-medium">{s.name || <span className="text-fidaro-text-muted/40">—</span>}</td>
-                        <td className="px-4 py-3">{s.email || <span className="text-fidaro-text-muted/40">—</span>}</td>
-                        <td className="px-4 py-3">{s.phone || <span className="text-fidaro-text-muted/40">—</span>}</td>
-                        <td className="px-4 py-3">{s.property_address || <span className="text-fidaro-text-muted/40">—</span>}</td>
+                        <td className="px-4 py-3 font-medium">{adminMode ? (s.name || <span className="text-fidaro-text-muted/40">—</span>) : <span className="blur-sm select-none text-fidaro-text-muted">{maskPII(s.name)}</span>}</td>
+                        <td className="px-4 py-3">{adminMode ? (s.email || <span className="text-fidaro-text-muted/40">—</span>) : <span className="blur-sm select-none text-fidaro-text-muted">{maskPII(s.email)}</span>}</td>
+                        <td className="px-4 py-3">{adminMode ? (s.phone || <span className="text-fidaro-text-muted/40">—</span>) : <span className="blur-sm select-none text-fidaro-text-muted">{maskPII(s.phone)}</span>}</td>
+                        <td className="px-4 py-3">{adminMode ? (s.property_address || <span className="text-fidaro-text-muted/40">—</span>) : <span className="blur-sm select-none text-fidaro-text-muted">{maskPII(s.property_address)}</span>}</td>
                         <td className="px-4 py-3 text-right font-bold tabular text-fidaro-green-dark">{s.total}</td>
                         <td className="px-4 py-3">
                           <span className={`inline-block px-2 py-1 rounded text-xs ${
@@ -1081,7 +1092,7 @@ function OverviewTab({ leads, payments, scores, onNavigate }) {
                     € {p.amount} {String(p.currency || "").toUpperCase()} betaald
                   </div>
                   <div className="text-xs text-fidaro-text-muted">
-                    {p.metadata?.lead_email || "—"} · {new Date(p.created_at).toLocaleString("nl-NL", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                    {adminMode ? (p.metadata?.lead_email || "—") : maskPII(p.metadata?.lead_email)} · {new Date(p.created_at).toLocaleString("nl-NL", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
                   </div>
                 </div>
               </li>
@@ -1091,7 +1102,7 @@ function OverviewTab({ leads, payments, scores, onNavigate }) {
                 <span className="mt-1 w-2 h-2 rounded-full bg-fidaro-green-bright flex-shrink-0" />
                 <div>
                   <div className="text-fidaro-ink font-medium">
-                    {l.name}
+                    {adminMode ? l.name : maskPII(l.name)}
                     {l.service === "investment_plan" && (
                       <span className="ml-2 text-[10px] uppercase tracking-widest text-fidaro-green-dark font-semibold">
                         €750
@@ -1099,7 +1110,7 @@ function OverviewTab({ leads, payments, scores, onNavigate }) {
                     )}
                   </div>
                   <div className="text-xs text-fidaro-text-muted">
-                    {l.email} · {new Date(l.created_at).toLocaleString("nl-NL", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                    {adminMode ? l.email : maskPII(l.email)} · {new Date(l.created_at).toLocaleString("nl-NL", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
                   </div>
                 </div>
               </li>
