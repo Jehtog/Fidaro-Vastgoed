@@ -7,6 +7,12 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const LOGO_URL =
   "https://customer-assets.emergentagent.com/job_35e0d8c8-8484-434c-b0cb-1a5cfc9d3012/artifacts/p4sighyv_Untitled%20design%20%2811%29.png";
 
+// ==========================================
+// SHARED DESIGN SYSTEM CONSTANTS & HELPERS
+// ==========================================
+const inputCls = "w-full bg-white border border-fidaro-green-light rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-fidaro-green focus:ring-2 focus:ring-fidaro-green/20 transition-colors";
+const lblCls = "text-[10px] font-mono uppercase tracking-[0.18em] text-fidaro-text-muted";
+
 // Helper: derive rent category label from total.
 const categoryLabel = (total) => {
   if (total == null) return "—";
@@ -27,8 +33,20 @@ const toLocalInput = (d) => {
   );
 };
 
+// PII masking helper
+const maskPII = (val) => {
+  if (!val) return '—';
+  const s = String(val);
+  if (s.includes('@')) {
+    const [name, domain] = s.split('@');
+    if (name.length <= 1) return `****@${domain}`;
+    return `${name[0]}***@${domain}`;
+  }
+  if (s.length <= 2) return '••';
+  return s[0] + '•'.repeat(Math.min(s.length - 2, 8)) + s[s.length - 1];
+};
+
 // FastAPI 422 returns detail as an array of {type, loc, msg, input, ctx}.
-// React cannot render objects directly, so we always coerce to a string here.
 const formatApiError = (err) => {
   const detail = err?.response?.data?.detail;
   if (!detail) return "Opslaan mislukt";
@@ -39,6 +57,9 @@ const formatApiError = (err) => {
   return "Opslaan mislukt";
 };
 
+// ==========================================
+// MAIN DASHBOARD PLATFORM ORCHESTRATOR
+// ==========================================
 export default function Admin() {
   const [token, setToken] = useState(() => localStorage.getItem("fidaro_admin_token") || "");
   const [password, setPassword] = useState("");
@@ -49,13 +70,6 @@ export default function Admin() {
   const [tab, setTab] = useState("overview");
   const [adminMode, setAdminMode] = useState(false);
 
-  // PII masking helper
-  const maskPII = (val) => {
-    if (!val) return '—';
-    const s = String(val);
-    if (s.length <= 2) return '••';
-    return s[0] + '•'.repeat(Math.min(s.length - 2, 8)) + s[s.length - 1];
-  };
   const [showScoreForm, setShowScoreForm] = useState(false);
   const [showLeadForm, setShowLeadForm] = useState(false);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
@@ -242,6 +256,7 @@ export default function Admin() {
             payments={payments}
             scores={scores}
             onNavigate={setTab}
+            adminMode={adminMode}
           />
         )}
 
@@ -400,7 +415,6 @@ export default function Admin() {
         {/* WWS SCORES TAB */}
         {!loading && tab === "scores" && (
           <div data-testid="scores-tab">
-            {/* Top bar with stats + add button */}
             <div className="flex flex-wrap items-end justify-between gap-4 mb-5">
               <div className="rounded-xl bg-white border border-fidaro-green-light px-5 py-3">
                 <div className="text-[10px] uppercase tracking-widest text-fidaro-text-muted">Totaal WWS-scores</div>
@@ -524,7 +538,9 @@ export default function Admin() {
   );
 }
 
-
+// ==========================================
+// LOWER-LEVEL ISOLATED SUB-COMPONENTS
+// ==========================================
 function ScoreEntryModal({ token, onClose, onCreated }) {
   const [form, setForm] = useState({
     name: "",
@@ -541,12 +557,11 @@ function ScoreEntryModal({ token, onClose, onCreated }) {
     e.preventDefault();
     const totalNum = parseFloat(form.total);
     if (Number.isNaN(totalNum)) {
-      toast.error("Voer een geldige WWS-score in");
+      toast.error("Voer een geldig bedrag in");
       return;
     }
     setSaving(true);
     try {
-      // datetime-local has no timezone; convert to ISO with local tz preserved.
       const iso = new Date(form.created_at).toISOString();
       const res = await axios.post(
         `${API}/admin/wws-scores`,
@@ -556,8 +571,7 @@ function ScoreEntryModal({ token, onClose, onCreated }) {
           phone: form.phone,
           property_address: form.property_address,
           total: totalNum,
-          category:
-            totalNum < 144 ? "social" : totalNum < 187 ? "middle" : "free",
+          category: totalNum < 144 ? "social" : totalNum < 187 ? "middle" : "free",
           note: form.note,
           created_at: iso,
           source: "admin_manual",
@@ -572,18 +586,12 @@ function ScoreEntryModal({ token, onClose, onCreated }) {
     }
   };
 
-  const inputCls =
-    "w-full bg-white border border-fidaro-green-light rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-fidaro-green focus:ring-2 focus:ring-fidaro-green/20 transition-colors";
-
   return (
     <div
       data-testid="score-entry-modal"
       className="fixed inset-0 z-50 bg-fidaro-green-dark/45 backdrop-blur flex items-center justify-center p-4 overflow-y-auto"
     >
-      <form
-        onSubmit={submit}
-        className="bg-white rounded-3xl max-w-xl w-full p-8 shadow-2xl my-8"
-      >
+      <form onSubmit={submit} className="bg-white rounded-3xl max-w-xl w-full p-8 shadow-2xl my-8">
         <div className="flex items-start justify-between">
           <div>
             <div className="text-[10px] uppercase tracking-widest text-fidaro-green font-mono">
@@ -591,117 +599,51 @@ function ScoreEntryModal({ token, onClose, onCreated }) {
             </div>
             <h3 className="mt-1 font-display text-2xl text-fidaro-ink">Nieuwe WWS-score</h3>
           </div>
-          <button
-            type="button"
-            data-testid="score-entry-close"
-            onClick={onClose}
-            className="text-fidaro-text-muted hover:text-fidaro-ink p-1"
-          >
+          <button type="button" data-testid="score-entry-close" onClick={onClose} className="text-fidaro-text-muted hover:text-fidaro-ink p-1">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <div className="mt-6 grid sm:grid-cols-2 gap-3">
           <label className="block">
-            <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-fidaro-text-muted">Naam</span>
-            <input
-              data-testid="score-name"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className={`${inputCls} mt-1.5`}
-            />
+            <span className={lblCls}>Naam</span>
+            <input data-testid="score-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className={`${inputCls} mt-1.5`} />
           </label>
           <label className="block">
-            <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-fidaro-text-muted">E-mail</span>
-            <input
-              data-testid="score-email"
-              type="email"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className={`${inputCls} mt-1.5`}
-            />
+            <span className={lblCls}>E-mail</span>
+            <input data-testid="score-email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className={`${inputCls} mt-1.5`} />
           </label>
           <label className="block">
-            <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-fidaro-text-muted">Telefoon</span>
-            <input
-              data-testid="score-phone"
-              value={form.phone}
-              onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              className={`${inputCls} mt-1.5`}
-            />
+            <span className={lblCls}>Telefoon</span>
+            <input data-testid="score-phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className={`${inputCls} mt-1.5`} />
           </label>
           <label className="block">
-            <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-fidaro-text-muted">Adres</span>
-            <input
-              data-testid="score-address"
-              value={form.property_address}
-              onChange={(e) => setForm({ ...form, property_address: e.target.value })}
-              className={`${inputCls} mt-1.5`}
-            />
+            <span className={lblCls}>Adres</span>
+            <input data-testid="score-address" value={form.property_address} onChange={(e) => setForm({ ...form, property_address: e.target.value })} className={`${inputCls} mt-1.5`} />
           </label>
           <label className="block">
-            <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-fidaro-text-muted">
-              WWS-score *
-            </span>
-            <input
-              data-testid="score-total"
-              type="number"
-              step="0.25"
-              required
-              value={form.total}
-              onChange={(e) => setForm({ ...form, total: e.target.value })}
-              className={`${inputCls} mt-1.5`}
-              placeholder="bijv. 175"
-            />
+            <span className={lblCls}>WWS-score *</span>
+            <input data-testid="score-total" type="number" step="0.25" required value={form.total} onChange={(e) => setForm({ ...form, total: e.target.value })} className={`${inputCls} mt-1.5`} placeholder="bijv. 175" />
           </label>
           <label className="block">
-            <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-fidaro-text-muted">
-              Datum &amp; tijd *
-            </span>
-            <input
-              data-testid="score-datetime"
-              type="datetime-local"
-              required
-              value={form.created_at}
-              onChange={(e) => setForm({ ...form, created_at: e.target.value })}
-              className={`${inputCls} mt-1.5`}
-            />
+            <span className={lblCls}>Datum &amp; tijd *</span>
+            <input data-testid="score-datetime" type="datetime-local" required value={form.created_at} onChange={(e) => setForm({ ...form, created_at: e.target.value })} className={`${inputCls} mt-1.5`} />
           </label>
           <label className="block sm:col-span-2">
-            <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-fidaro-text-muted">Notitie</span>
-            <textarea
-              data-testid="score-note"
-              value={form.note}
-              onChange={(e) => setForm({ ...form, note: e.target.value })}
-              rows={2}
-              className={`${inputCls} mt-1.5 resize-none`}
-            />
+            <span className={lblCls}>Notitie</span>
+            <textarea data-testid="score-note" value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} rows={2} className={`${inputCls} mt-1.5 resize-none`} />
           </label>
         </div>
 
         {form.total && !Number.isNaN(parseFloat(form.total)) && (
           <div className="mt-4 text-xs text-fidaro-text-muted">
-            Categorie: <span className="font-semibold text-fidaro-ink">
-              {categoryLabel(parseFloat(form.total))}
-            </span>
+            Categorie: <span className="font-semibold text-fidaro-ink">{categoryLabel(parseFloat(form.total))}</span>
           </div>
         )}
 
         <div className="mt-7 flex gap-3">
-          <button
-            type="button"
-            data-testid="score-cancel-btn"
-            onClick={onClose}
-            className="flex-1 border border-fidaro-green-light text-fidaro-text-muted rounded-full px-4 py-3 hover:bg-fidaro-green-light/40 transition-colors"
-          >
-            Annuleren
-          </button>
-          <button
-            type="submit"
-            data-testid="score-save-btn"
-            disabled={saving}
-            className="flex-[2] bg-fidaro-green hover:bg-fidaro-green-dark disabled:opacity-60 text-white rounded-full px-4 py-3 font-semibold transition-colors flex items-center justify-center gap-2 shadow-[0_6px_22px_rgba(79,111,87,0.3)]"
-          >
+          <button type="button" data-testid="score-cancel-btn" onClick={onClose} className="flex-1 border border-fidaro-green-light text-fidaro-text-muted rounded-full px-4 py-3 hover:bg-fidaro-green-light/40 transition-colors">Annuleren</button>
+          <button type="submit" data-testid="score-save-btn" disabled={saving} className="flex-[2] bg-fidaro-green hover:bg-fidaro-green-dark disabled:opacity-60 text-white rounded-full px-4 py-3 font-semibold transition-colors flex items-center justify-center gap-2 shadow-[0_6px_22px_rgba(79,111,87,0.3)]">
             {saving && <Loader2 className="w-4 h-4 animate-spin" />}
             Opslaan
           </button>
@@ -710,7 +652,6 @@ function ScoreEntryModal({ token, onClose, onCreated }) {
     </div>
   );
 }
-
 
 function LeadEntryModal({ token, onClose, onCreated }) {
   const [form, setForm] = useState({
@@ -736,12 +677,7 @@ function LeadEntryModal({ token, onClose, onCreated }) {
       const iso = new Date(form.created_at).toISOString();
       const res = await axios.post(
         `${API}/admin/leads`,
-        {
-          ...form,
-          source: "admin_manual",
-          language: "nl",
-          created_at: iso,
-        },
+        { ...form, source: "admin_manual", language: "nl", created_at: iso },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       onCreated(res.data);
@@ -751,10 +687,6 @@ function LeadEntryModal({ token, onClose, onCreated }) {
       setSaving(false);
     }
   };
-
-  const inputCls =
-    "w-full bg-white border border-fidaro-green-light rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-fidaro-green focus:ring-2 focus:ring-fidaro-green/20 transition-colors";
-  const lblCls = "text-[10px] font-mono uppercase tracking-[0.18em] text-fidaro-text-muted";
 
   return (
     <div
@@ -827,7 +759,6 @@ function LeadEntryModal({ token, onClose, onCreated }) {
   );
 }
 
-
 function PaymentEntryModal({ token, onClose, onCreated }) {
   const [form, setForm] = useState({
     amount: "99",
@@ -865,9 +796,6 @@ function PaymentEntryModal({ token, onClose, onCreated }) {
       setSaving(false);
     }
   };
-
-  const inputCls = "w-full bg-white border border-fidaro-green-light rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-fidaro-green focus:ring-2 focus:ring-fidaro-green/20 transition-colors";
-  const lblCls = "text-[10px] font-mono uppercase tracking-[0.18em] text-fidaro-text-muted";
 
   return (
     <div
@@ -948,37 +876,27 @@ function PaymentEntryModal({ token, onClose, onCreated }) {
   );
 }
 
-
-function OverviewTab({ leads, payments, scores, onNavigate }) {
-  // Revenue: count only paid payments.
+function OverviewTab({ leads = [], payments = [], scores = [], onNavigate, adminMode = false }) {
   const paidPayments = payments.filter((p) => p.payment_status === "paid");
-  const totalRevenue = paidPayments.reduce(
-    (sum, p) => sum + (parseFloat(p.amount) || 0),
-    0
-  );
+  const totalRevenue = paidPayments.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
 
-  // 7-day windows for trend.
   const now = Date.now();
   const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
   const within7Days = (iso) => {
     const t = new Date(iso).getTime();
     return Number.isFinite(t) && now - t < WEEK_MS;
   };
+  
   const leadsThisWeek = leads.filter((l) => within7Days(l.created_at)).length;
   const scoresThisWeek = scores.filter((s) => within7Days(s.created_at)).length;
   const revenueThisWeek = paidPayments
     .filter((p) => within7Days(p.created_at))
     .reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
 
-  const investmentPlanRequests = leads.filter(
-    (l) => l.service === "investment_plan"
-  ).length;
+  const investmentPlanRequests = leads.filter((l) => l.service === "investment_plan").length;
 
   const avgScore = scores.length
-    ? Math.round(
-        scores.reduce((sum, s) => sum + (parseFloat(s.total) || 0), 0) /
-          scores.length
-      )
+    ? Math.round(scores.reduce((sum, s) => sum + (parseFloat(s.total) || 0), 0) / scores.length)
     : null;
 
   const recentLeads = leads.slice(0, 5);
@@ -986,7 +904,6 @@ function OverviewTab({ leads, payments, scores, onNavigate }) {
 
   return (
     <div data-testid="overview-tab" className="space-y-8">
-      {/* Hero greeting */}
       <div className="rounded-3xl bg-gradient-to-br from-fidaro-green-dark via-fidaro-green-dark to-fidaro-green p-8 md:p-10 text-white relative overflow-hidden">
         <div className="absolute -top-20 -right-16 w-72 h-72 bg-fidaro-green-bright/25 rounded-full blur-3xl pointer-events-none" />
         <div className="relative">
@@ -1002,85 +919,26 @@ function OverviewTab({ leads, payments, scores, onNavigate }) {
         </div>
       </div>
 
-      {/* KPI cards */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPICard
-          label="Totaal leads"
-          value={leads.length}
-          delta={`${leadsThisWeek} deze week`}
-          icon={Users}
-        />
-        <KPICard
-          label="Totale omzet (betaald)"
-          value={`€ ${totalRevenue.toLocaleString("nl-NL")}`}
-          delta={
-            revenueThisWeek > 0
-              ? `+ € ${revenueThisWeek.toLocaleString("nl-NL")} deze week`
-              : "Geen omzet deze week"
-          }
-          icon={CreditCard}
-        />
-        <KPICard
-          label="WWS-scores"
-          value={scores.length}
-          delta={
-            avgScore != null
-              ? `Gem. ${avgScore} pt · ${scoresThisWeek} deze week`
-              : "Nog geen scores"
-          }
-          icon={Calculator}
-        />
-        <KPICard
-          label="€750 aanvragen"
-          value={investmentPlanRequests}
-          delta="Investment Plan"
-          icon={LayoutDashboard}
-        />
+        <KPICard label="Totaal leads" value={leads.length} delta={`${leadsThisWeek} deze week`} icon={Users} />
+        <KPICard label="Totale omzet (betaald)" value={`€ ${totalRevenue.toLocaleString("nl-NL")}`} delta={revenueThisWeek > 0 ? `+ € ${revenueThisWeek.toLocaleString("nl-NL")} deze week` : "Geen omzet deze week"} icon={CreditCard} />
+        <KPICard label="WWS-scores" value={scores.length} delta={avgScore != null ? `Gem. ${avgScore} pt · ${scoresThisWeek} deze week` : "Nog geen scores"} icon={Calculator} />
+        <KPICard label="€750 aanvragen" value={investmentPlanRequests} delta="Investment Plan" icon={LayoutDashboard} />
       </div>
 
-      {/* Navigation cards + recent activity */}
-      <div className="grid lg:grid-cols-3 gap-5">
+      <div className="grid lg:grid-cols-3 gap-5 items-start">
         <div className="lg:col-span-2 grid sm:grid-cols-2 gap-4">
-          <NavTile
-            icon={Users}
-            title="Leads"
-            count={leads.length}
-            desc="Alle ingekomen aanvragen via contact, Quick-Scan en Investment Plan."
-            onClick={() => onNavigate("leads")}
-            testid="goto-leads"
-          />
-          <NavTile
-            icon={CreditCard}
-            title="Betalingen"
-            count={payments.length}
-            desc="Stripe-betalingen + handmatig geboekte transacties."
-            onClick={() => onNavigate("payments")}
-            testid="goto-payments"
-          />
-          <NavTile
-            icon={Calculator}
-            title="WWS-scores"
-            count={scores.length}
-            desc="Berekende scores via de calculator en handmatig opgenomen klantscores."
-            onClick={() => onNavigate("scores")}
-            testid="goto-scores"
-          />
-          <NavTile
-            icon={LayoutDashboard}
-            title="Website"
-            count={null}
-            desc="Bekijk de live website in een nieuw tabblad."
-            onClick={() => window.open("/", "_blank")}
-            testid="goto-website"
-          />
+          <NavTile icon={Users} title="Leads" count={leads.length} desc="Alle ingekomen aanvragen via contact, Quick-Scan en Investment Plan." onClick={() => onNavigate("leads")} testid="goto-leads" />
+          <NavTile icon={CreditCard} title="Betalingen" count={payments.length} desc="Stripe-betalingen + handmatig geboekte transacties." onClick={() => onNavigate("payments")} testid="goto-payments" />
+          <NavTile icon={Calculator} title="WWS-scores" count={scores.length} desc="Berekende scores via de calculator en handmatig opgenomen klantscores." onClick={() => onNavigate("scores")} testid="goto-scores" />
+          <NavTile icon={LayoutDashboard} title="Website" count={null} desc="Bekijk de live website in een nieuw tabblad." onClick={() => window.open("/", "_blank")} testid="goto-website" />
         </div>
 
-        {/* Recent activity feed */}
-        <div className="bg-white rounded-3xl border border-fidaro-green-light p-6">
+        <div className="bg-white rounded-3xl border border-fidaro-green-light p-6 self-start">
           <div className="text-[10px] uppercase tracking-[0.22em] text-fidaro-text-muted font-mono">
             Recente activiteit
           </div>
-          <ul className="mt-4 space-y-3">
+          <ul className="mt-4 space-y-4">
             {recentLeads.length === 0 && recentPayments.length === 0 && (
               <li className="text-sm text-fidaro-text-muted">Nog geen activiteit.</li>
             )}
@@ -1122,7 +980,6 @@ function OverviewTab({ leads, payments, scores, onNavigate }) {
   );
 }
 
-
 function KPICard({ label, value, delta, icon: Icon }) {
   return (
     <div className="bg-white rounded-2xl border border-fidaro-green-light p-5">
@@ -1146,13 +1003,12 @@ function KPICard({ label, value, delta, icon: Icon }) {
   );
 }
 
-
 function NavTile({ icon: Icon, title, count, desc, onClick, testid }) {
   return (
     <button
       onClick={onClick}
       data-testid={testid}
-      className="group text-left bg-white rounded-3xl border border-fidaro-green-light p-6 hover:border-fidaro-green hover:shadow-[0_18px_45px_-22px_rgba(63,92,73,0.25)] hover:-translate-y-0.5 transition-all"
+      className="group text-left bg-white rounded-3xl border border-fidaro-green-light p-6 hover:border-fidaro-green hover:shadow-[0_18px_45px_-22px_rgba(63,92,73,0.25)] hover:-translate-y-0.5 transition-all w-full"
     >
       <div className="flex items-start justify-between">
         <div className="w-11 h-11 rounded-xl bg-fidaro-green-light/60 flex items-center justify-center text-fidaro-green-dark">
